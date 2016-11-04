@@ -21,6 +21,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mButton = (Button) findViewById(R.id.button);
         mListView = (ListView) findViewById(R.id.list_view);
         mButton.setOnClickListener(this);
+        localCore.sendApproved();
     }
 
     @Override

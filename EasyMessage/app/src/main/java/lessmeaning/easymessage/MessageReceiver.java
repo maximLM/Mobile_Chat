@@ -11,17 +11,19 @@ import android.support.v4.app.TaskStackBuilder;
 
 public class MessageReceiver extends BroadcastReceiver {
 
+    public static final String MESSAGE = "MEESSSSSS";
+
     @Override
     public void onReceive(Context context, Intent intent) {
-        makeNotification(context);
+        makeNotification(context, intent.getStringExtra(MESSAGE));
     }
 
-    private void makeNotification(Context context) {
+    private void makeNotification(Context context, String msg) {
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(context)
                         .setSmallIcon(R.mipmap.ic_launcher)
-                        .setContentTitle("My notification")
-                        .setContentText("Hello BBBBBBBB!");
+                        .setContentTitle("Message from friend")
+                        .setContentText(msg);
 
         Intent startMyActivity = new Intent(context, MainActivity.class);
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);

@@ -10,12 +10,16 @@ import android.os.Build;
 import android.os.IBinder;
 import android.util.Log;
 
+import java.util.ArrayList;
+
 public class Merger extends Service implements Runnable {
 
+    LocalDataBase localdb;
 
     @Override
     public void onCreate() {
         super.onCreate();
+        localdb = new LocalDataBase(this);
         new Thread(this).start();
     }
 
@@ -33,7 +37,6 @@ public class Merger extends Service implements Runnable {
 
     @Override
     public void onTaskRemoved(Intent rootIntent) {
-        Log.i("Test", "Service: onTaskRemoved");
         if (Build.VERSION.SDK_INT == 19) {
             Intent restartIntent = new Intent(this, getClass());
 
@@ -47,14 +50,33 @@ public class Merger extends Service implements Runnable {
 
     @Override
     public void run() {
-//        do something
+        test1();
     }
 
-    private void sendMsgToUpd() {
-        if (checkIsActivityAlive(MainActivity.class, this))
-            sendBroadcast(new Intent(LocalCore.BROADCAST));
+    private void test1() {
+        int i = 12;
+        while (true) {
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            ArrayList<Row> rows = new ArrayList<>();
+            rows.add(new Row("this is " + i, i));
+            rows.add(new Row("this is twice " + 2 * i, i));
+            sendMsgToUpd(rows.get(0).content);
+            localdb.addApproved(rows);
+            i *= 2;
+            i++;
+        }
+    }
 
-        sendBroadcast(new Intent(this, MessageReceiver.class));
+
+    private void sendMsgToUpd(String msg) {
+        sendBroadcast(new Intent(LocalCore.BROADCAST));
+        Intent intent = new Intent(this, MessageReceiver.class);
+        intent.putExtra(MessageReceiver.MESSAGE, msg);
+        sendBroadcast(intent);
 
     }
 
