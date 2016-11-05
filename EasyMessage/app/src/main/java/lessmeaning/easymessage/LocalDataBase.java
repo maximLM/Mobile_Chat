@@ -71,6 +71,7 @@ public class LocalDataBase extends SQLiteOpenHelper implements BaseColumns {
     }
 
     public ArrayList<String> getTemp() {
+
         ArrayList<String> alTemp = new ArrayList();
         SQLiteDatabase chatDB = this.getWritableDatabase();
         Cursor c = chatDB.query(TABLE_NAME_TEMP , null, null, null, null, null, null);
