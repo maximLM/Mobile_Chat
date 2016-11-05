@@ -11,6 +11,10 @@ import android.os.IBinder;
 import android.util.Log;
 import android.util.Pair;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -19,12 +23,14 @@ import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class Merger extends Service implements Runnable {
 
     private volatile boolean running;
     private LocalDataBase localdb;
     private final String SERVER_NAME = "there_will_be_a_server_name";
+    private final String API_NAME = "there_will_be_api_name";
 
     @Override
     public void onCreate() {
@@ -62,11 +68,14 @@ public class Merger extends Service implements Runnable {
     public void run() {
         while (running) {
             checkLocal();
-            checkServer();
+            String msg = checkServer();
+            if (msg != null && !msg.equals("")) {
+                sendMsgToUpd(msg);
+            }
         }
     }
 
-    private void checkServer() {
+    private String checkServer() {
         long time = localdb.getLastTime();
 
         String lnk = generateLink(time);
@@ -102,35 +111,104 @@ public class Merger extends Service implements Runnable {
                     e.printStackTrace();
                 }
             }
-
             if (conn != null) {
                 conn.disconnect();
             }
         }
 
-        if (rawInput == null || rawInput.equals("")) return;
+        if (rawInput == null || rawInput.equals("")) return null;
 
-        ArrayList<Row> rows = convertToNormal(rawInput);
-        if (rows == null || rows.size() == 0) return;
-        localdb.addApproved(rows);
-    }
 
-    private String generateLink(long time) {
-//        TODO make ling with query
+        try {
+            ArrayList<Row> rows = convertToNormal(rawInput);
+            if (rows == null || rows.size() == 0) return null;
+            localdb.addApproved(rows);
+            return rows.get(0).getContent();
+        } catch (JSONException e) {
+            e.printStackTrace();
+            System.err.println("JSON not correct it is : \n" + rawInput);
+        }
         return null;
     }
 
-    private ArrayList<Row> convertToNormal(String rawInput) {
+    private String generateLink(long time) {
+        return SERVER_NAME +
+                "/" +
+                API_NAME +
+                "?" +
+                Fields.ACTION +
+                "=" +
+                Actions.GET +
+                "&" +
+                Fields.TIME +
+                "=" +
+                time;
+    }
+    private String generateLink(String msg) {
+        return SERVER_NAME +
+                "/" +
+                API_NAME +
+                "?" +
+                Fields.ACTION +
+                "=" +
+                Actions.SEND +
+                "&" +
+                Fields.MESSAGE +
+                "=" +
+                msg;
+    }
+
+    private ArrayList<Row> convertToNormal(String rawInput) throws JSONException {
         ArrayList<Row> res = new ArrayList<>();
-//        TODO : proper converting from JSONArray
+        JSONArray array = new JSONArray(rawInput);
+        JSONObject row;
+        int len = array.length();
+        for (int i = 0; i < len; i++) {
+            row = array.getJSONObject(i);
+            res.add(new Row(row.getString(Fields.MESSAGE + ""),
+                    row.getLong(Fields.TIME + "")));
+        }
+        Collections.sort(res);
         return res;
     }
 
 
     private boolean sendToServer(String msg) {
-//       TODO: code this
-        return false;
+        String lnk = generateLink(msg);
+        HttpURLConnection conn = null;
+        BufferedReader in = null;
+        boolean success = false;
+        try {
+            conn = (HttpURLConnection) new URL(lnk).openConnection();
+            conn.setReadTimeout(10000);
+            conn.setConnectTimeout(15000);
+            conn.setRequestMethod("POST");
+            conn.setDoInput(true);
+            conn.connect();
+            in = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
+            while (in.ready() && !success) {
+                success =  in.readLine().contains(Fields.SUCCESS + "");
+            }
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (conn != null) {
+                conn.disconnect();
+            }
+            if (in != null) {
+                try {
+                    in.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return success;
     }
+
+
 
     private void checkLocal() {
         ArrayList<Pair<String, Integer>> freshRows = localdb.getTemp();
