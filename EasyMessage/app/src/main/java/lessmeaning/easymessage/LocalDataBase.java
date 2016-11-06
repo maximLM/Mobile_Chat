@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
 import android.util.Log;
+import android.util.Pair;
 
 import java.util.ArrayList;
 
@@ -70,14 +71,15 @@ public class LocalDataBase extends SQLiteOpenHelper implements BaseColumns {
         return row;
     }
 
-    public ArrayList<String> getTemp() {
-        ArrayList<String> alTemp = new ArrayList();
+    public ArrayList<Pair<String, Integer>> getTemp() {
+        ArrayList<Pair <String, Integer>> alTemp = new ArrayList();
         SQLiteDatabase chatDB = this.getWritableDatabase();
         Cursor c = chatDB.query(TABLE_NAME_TEMP , null, null, null, null, null, null);
         if (c.moveToFirst()){
             do {
                 String content = c.getString(c.getColumnIndex(CONTENT));
-                alTemp.add(content);
+                int id = (int) c.getInt(c.getColumnIndex(KEY_ID));
+                alTemp.add(new Pair<String, Integer>(content, id));
             } while (c.moveToNext());
         }
         c.close();
@@ -95,8 +97,8 @@ public class LocalDataBase extends SQLiteOpenHelper implements BaseColumns {
         SQLiteDatabase chatDB = this.getWritableDatabase();
         ContentValues cv = new ContentValues();
         for (int i = 0; i < size; i++) {
-            cv.put(CONTENT , rows.get(i).content);
-            cv.put(TIME, rows.get(i).time);
+            cv.put(CONTENT , rows.get(i).getContent());
+            cv.put(TIME, rows.get(i).getTime());
             chatDB.insert(TABLE_NAME_APPROVED, null, cv);
         }
         chatDB.close();
