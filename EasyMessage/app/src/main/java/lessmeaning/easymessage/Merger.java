@@ -50,9 +50,8 @@ public class Merger extends Service implements Runnable {
 
     @Override
     public void run() {
-//        do smth
-    }
 
+    }
 
 
     private void sendMsgToUpd(String msg) {
