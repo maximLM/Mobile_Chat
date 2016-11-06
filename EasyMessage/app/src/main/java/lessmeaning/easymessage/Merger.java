@@ -50,25 +50,7 @@ public class Merger extends Service implements Runnable {
 
     @Override
     public void run() {
-        test1();
-    }
-
-    private void test1() {
-        int i = 12;
-        while (true) {
-            try {
-                Thread.sleep(5000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            ArrayList<Row> rows = new ArrayList<>();
-            rows.add(new Row("this is " + i, i));
-            rows.add(new Row("this is twice " + 2 * i, i));
-            sendMsgToUpd(rows.get(0).content);
-            localdb.addApproved(rows);
-            i *= 2;
-            i++;
-        }
+//        do something
     }
 
 
