@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.IBinder;
 import android.util.Log;
+import android.util.Pair;
 
 import java.util.ArrayList;
 
@@ -50,7 +51,26 @@ public class Merger extends Service implements Runnable {
 
     @Override
     public void run() {
+        test2();
+    }
 
+    private void test2() {
+        ArrayList<Row> approved = new ArrayList<>();
+        while (true) {
+            ArrayList<Pair<String, Integer>> rows = localdb.getTemp();
+            for (Pair<String, Integer> row : rows) {
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                approved.add(new Row(row.first, row.second));
+                localdb.addApproved(approved);
+                sendMsgToUpd(approved.get(0).getContent());
+                localdb.deleteTempRow(row.second);
+                approved.clear();
+            }
+        }
     }
 
 

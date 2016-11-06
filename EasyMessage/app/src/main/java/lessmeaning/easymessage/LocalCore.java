@@ -42,7 +42,7 @@ public class LocalCore {
         int len = rows.size();
         String values[] = new String[len];
         for (int i = 0; i < len; i++) {
-            values[i] = rows.get(i).content;
+            values[i] = rows.get(i).getContent();
         }
         activity.reloadList(values);
     }
