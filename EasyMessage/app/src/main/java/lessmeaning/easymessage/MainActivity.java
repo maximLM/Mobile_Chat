@@ -31,8 +31,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onClick (View v) {
         if (v.getId() == mButton.getId()) {
-            localCore.addTemp(mEditText.getText().toString());
-            mEditText.setText("");
+            if (!mEditText.getText().toString().equals("")) {
+                localCore.addTemp(mEditText.getText().toString());
+                mEditText.setText("");
+            }
         }
     }
 
