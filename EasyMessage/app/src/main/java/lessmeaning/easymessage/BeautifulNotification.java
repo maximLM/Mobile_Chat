@@ -15,7 +15,7 @@ import static java.lang.System.currentTimeMillis;
 
 public class BeautifulNotification  {
 
-    public static void showNotification (Context context, String msg, String sender) {
+    public static void showMessageNotification (Context context, String msg, String sender) {
         Intent intent = new Intent(context, MainActivity.class);
         PendingIntent pIntent = PendingIntent.getActivity(context, 0, intent, 0);
 
