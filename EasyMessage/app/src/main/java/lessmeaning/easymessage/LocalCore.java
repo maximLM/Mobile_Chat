@@ -48,6 +48,11 @@ public class LocalCore {
     }
 
     private void connectToService() {
+        try {
+            activity.unregisterReceiver(brv);
+        } catch (IllegalArgumentException e) {
+//            do nothing;
+        }
         activity.registerReceiver(brv, new IntentFilter(BROADCAST));
         if (isServiceRunning(Merger.class, activity))
             return;

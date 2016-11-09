@@ -14,7 +14,7 @@ class Row implements Comparable<Row> {
 
     @Override
     public int compareTo(Row row) {
-        return (int) (row.time - time);
+        return (int) (time - row.time);
     }
 
     public String getContent() {

@@ -17,19 +17,22 @@ import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collections;
 
 public class Merger extends Service implements Runnable {
 
+    private static final String TAG = "supertesting";
     private volatile boolean running;
     private LocalDataBase localdb;
-    private final String SERVER_NAME = "there_will_be_a_server_name";
-    private final String API_NAME = "there_will_be_api_name";
+    private final String SERVER_NAME = "http://e-chat.h1n.ru";
+    private final String API_NAME = "chat.php";
 
     @Override
     public void onCreate() {
@@ -65,9 +68,11 @@ public class Merger extends Service implements Runnable {
 
     @Override
     public void run() {
-        while (running) {
+        Log.d(TAG, "run: inLoooop");
+        while (true) { // TODO replace with running
             checkLocal();
             String msg = checkServer();
+//            Log.d(TAG, "run: msg = " + msg);
             if (msg != null && !msg.equals("")) {
                 sendMsgToUpd(msg);
             }
@@ -84,7 +89,7 @@ public class Merger extends Service implements Runnable {
         String rawInput = null;
         try {
             conn = (HttpURLConnection) new URL(lnk).openConnection();
-            conn.setReadTimeout(10000);
+            conn.setReadTimeout(15000);
             conn.setConnectTimeout(15000);
             conn.setRequestMethod("POST");
             conn.setDoInput(true);
@@ -95,7 +100,8 @@ public class Merger extends Service implements Runnable {
             while (in.ready()) {
                 buffer.append(in.readLine());
             }
-            rawInput = buffer.substring(0, buffer.indexOf("]"));
+            rawInput = buffer.toString();
+
         } catch (ProtocolException e) {
             e.printStackTrace();
         } catch (MalformedURLException e) {
@@ -115,12 +121,14 @@ public class Merger extends Service implements Runnable {
             }
         }
 
+//        Log.d(TAG, "checkServer: rawinput = " + rawInput);
         if (rawInput == null || rawInput.equals("")) return null;
-
 
         try {
             ArrayList<Row> rows = convertToNormal(rawInput);
-            if (rows == null || rows.size() == 0) return null;
+
+            if (rows == null || rows.size() == 0)
+                return null;
             localdb.addApproved(rows);
             return rows.get(0).getContent();
         } catch (JSONException e) {
@@ -144,18 +152,9 @@ public class Merger extends Service implements Runnable {
                 time;
 
     }
-    private String generateLink(String msg) {
-        return SERVER_NAME +
-                "/" +
-                API_NAME +
-                "?" +
-                Fields.ACTION +
-                "=" +
-                Actions.SEND +
-                "&" +
-                Fields.MESSAGE +
-                "=" +
-                msg;
+    private String generateLink(String msg) throws UnsupportedEncodingException {
+        String utf = "UTF-8";
+        return SERVER_NAME + "/chat.php?action=send&message=" + URLEncoder.encode(msg.trim(), "UTF-8");
     }
 
     private ArrayList<Row> convertToNormal(String rawInput) throws JSONException {
@@ -167,6 +166,7 @@ public class Merger extends Service implements Runnable {
             row = array.getJSONObject(i);
             res.add(new Row(row.getString(Fields.MESSAGE + ""),
                     row.getLong(Fields.TIME + "")));
+            Log.d(TAG, "convertToNormal: row is " + res.get(res.size() - 1).getContent());
         }
         Collections.sort(res);
         return res;
@@ -174,15 +174,27 @@ public class Merger extends Service implements Runnable {
 
 
     private boolean sendToServer(String msg) {
-        String lnk = generateLink(msg);
+        String lnk = null;
+        try {
+            lnk = generateLink(msg);
+//            lnk = URLEncoder.encode(lnk, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            try {
+                lnk = generateLink("unsupportedencodingwashere");
+            } catch (UnsupportedEncodingException e1) {
+                throw new RuntimeException("UNREAL SITUATION");
+            }
+        }
+        Log.d(TAG, "sendToServer: " + lnk);
         HttpURLConnection conn = null;
         BufferedReader in = null;
         boolean success = false;
         try {
             conn = (HttpURLConnection) new URL(lnk).openConnection();
-            conn.setReadTimeout(10000);
+            conn.setReadTimeout(15000);
             conn.setConnectTimeout(15000);
             conn.setRequestMethod("POST");
+            conn.setRequestProperty("User-Agent", "Mozilla/5.0");
             conn.setDoInput(true);
             conn.connect();
             in = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
@@ -205,6 +217,7 @@ public class Merger extends Service implements Runnable {
                 }
             }
         }
+//        Log.d(TAG, "sendToServer: success = " + success);
         return success;
     }
 
