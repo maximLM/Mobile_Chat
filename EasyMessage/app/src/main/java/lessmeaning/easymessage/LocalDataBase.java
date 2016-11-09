@@ -20,10 +20,13 @@ public class LocalDataBase extends SQLiteOpenHelper implements BaseColumns {
 
     public static final String TABLE_NAME_APPROVED = "ApprovedTable";
     public static final String TABLE_NAME_TEMP = "TempTable";
+    public static final String TABLE_NAME_CONVERSATION = "ConversationTable";
     public static final String DB_NAME = "Chat";
     public static final String CONTENT = "Content";
     public static final String TIME = "Time";
+    public static final String CONVERSATION_ID = "conversationID";
     public static final String KEY_ID = "_id";
+    public static final String USER = "user";
     public LocalDataBase(Context context) {
         super(context, DB_NAME, null, 1);
     }
@@ -32,12 +35,21 @@ public class LocalDataBase extends SQLiteOpenHelper implements BaseColumns {
     public void onCreate(SQLiteDatabase db) {
         db.execSQL("create table " + TABLE_NAME_APPROVED + " ("
                 + KEY_ID + " integer primary key autoincrement,"
+                + CONVERSATION_ID + " integer,"
+                + USER + " text,"
                 + CONTENT + " text,"
                 + TIME + " integer);");
 
         db.execSQL("create table " + TABLE_NAME_TEMP + " ("
                 + KEY_ID + " integer primary key autoincrement,"
+                + CONVERSATION_ID + " integer,"
                 + CONTENT + " text);");
+
+        db.execSQL("create table " + TABLE_NAME_CONVERSATION + " ("
+                + KEY_ID + " integer primary key autoincrement,"
+                + CONVERSATION_ID + " integer,"
+                + USER + " text,"
+                + TIME + "integer);");
     }
 
     @Override
@@ -63,7 +75,9 @@ public class LocalDataBase extends SQLiteOpenHelper implements BaseColumns {
             do {
                 String content = c.getString(c.getColumnIndex(CONTENT));
                 long time = c.getInt(c.getColumnIndex(TIME));
-                Row r = new Row(content, time);
+                long conversationID = c.getInt(c.getColumnIndex(CONVERSATION_ID));
+                String userSender = c.getString(c.getColumnIndex(USER));
+                Row r = new Row(conversationID, userSender, content, time);
                 row.add(r);
             } while (c.moveToNext());
         }
@@ -99,6 +113,8 @@ public class LocalDataBase extends SQLiteOpenHelper implements BaseColumns {
         for (int i = 0; i < size; i++) {
             cv.put(CONTENT , rows.get(i).getContent());
             cv.put(TIME, rows.get(i).getTime());
+            cv.put(CONVERSATION_ID, rows.get(i).getConversationID());
+            cv.put(USER, rows.get(i).getUserSender());
             chatDB.insert(TABLE_NAME_APPROVED, null, cv);
         }
         chatDB.close();
