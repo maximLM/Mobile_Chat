@@ -15,29 +15,7 @@ public class MessageReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        makeNotification(context, intent.getStringExtra(MESSAGE));
-    }
-
-    private void makeNotification(Context context, String msg) {
-        NotificationCompat.Builder mBuilder =
-                new NotificationCompat.Builder(context)
-                        .setSmallIcon(R.mipmap.ic_launcher)
-                        .setContentTitle("Message from friend")
-                        .setContentText(msg);
-
-        Intent startMyActivity = new Intent(context, MainActivity.class);
-        TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
-        stackBuilder.addParentStack(MainActivity.class);
-        stackBuilder.addNextIntent(startMyActivity);
-        PendingIntent resultPendingIntent =
-                stackBuilder.getPendingIntent(
-                        0,
-                        PendingIntent.FLAG_UPDATE_CURRENT
-                );
-        mBuilder.setContentIntent(resultPendingIntent);
-        NotificationManager m = (NotificationManager)
-                context.getSystemService(Context.NOTIFICATION_SERVICE);
-        m.notify(11,mBuilder.build());
+        BeautifulNotification.showMessageNotification(context, intent.getStringExtra(MESSAGE), "friend");
     }
 }
 
