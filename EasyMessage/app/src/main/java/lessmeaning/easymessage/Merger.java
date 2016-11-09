@@ -10,7 +10,6 @@ import android.os.Build;
 import android.os.IBinder;
 import android.util.Log;
 import android.util.Pair;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -143,6 +142,7 @@ public class Merger extends Service implements Runnable {
                 Fields.TIME +
                 "=" +
                 time;
+
     }
     private String generateLink(String msg) {
         return SERVER_NAME +
