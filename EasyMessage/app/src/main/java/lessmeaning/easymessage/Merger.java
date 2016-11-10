@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.IBinder;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.util.Pair;
 import org.json.JSONArray;
@@ -15,6 +16,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
@@ -33,6 +35,7 @@ public class Merger extends Service implements Runnable {
     private LocalDataBase localdb;
     private final String SERVER_NAME = "http://e-chat.h1n.ru";
     private final String API_NAME = "chat.php";
+    private int counter = 0;
 
     @Override
     public void onCreate() {
@@ -55,7 +58,7 @@ public class Merger extends Service implements Runnable {
     @Override
     public void onTaskRemoved(Intent rootIntent) {
         running = false;
-        if (Build.VERSION.SDK_INT == 19) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             Intent restartIntent = new Intent(this, getClass());
 
             AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
@@ -72,36 +75,51 @@ public class Merger extends Service implements Runnable {
         while (true) { // TODO replace with running
             checkLocal();
             String msg = checkServer();
-//            Log.d(TAG, "run: msg = " + msg);
-            if (msg != null && !msg.equals("")) {
+            if (msg != null) {
                 sendMsgToUpd(msg);
+            }
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
     }
 
     private String checkServer() {
         long time = localdb.getLastTime();
-
-        String lnk = generateLink(time);
-
+        String lnk = null;
+        try {
+            lnk = "http://e-chat.h1n.ru/chat.php?action=get&time=" + URLEncoder.encode(String.valueOf(time), "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
         BufferedReader in = null;
         HttpURLConnection conn = null;
         String rawInput = null;
         try {
             conn = (HttpURLConnection) new URL(lnk).openConnection();
-            conn.setReadTimeout(15000);
-            conn.setConnectTimeout(15000);
+            counter++;
+//            conn.setReadTimeout(20000);// try to encrease this than test on vlads
+//            conn.setConnectTimeout(15000); encre
             conn.setRequestMethod("POST");
-            conn.setDoInput(true);
-            conn.connect();
+            conn.setRequestProperty("USER-AGENT", "Mozilla/5.0");
+            conn.setRequestProperty("ACCEPT-LANGUAGE", "en-US,en;0.5");
+            conn.setDoOutput(true);
+
+            int respondseCode = conn.getResponseCode();
             in = new BufferedReader(
-                    new InputStreamReader(conn.getInputStream(), "UTF-8"));
+                    new InputStreamReader(conn.getInputStream()));
             StringBuilder buffer = new StringBuilder();
-            while (in.ready()) {
-                buffer.append(in.readLine());
+            int i = 0;
+            String line = "";
+            while ((line = in.readLine()) != null) {
+                i++;
+                buffer.append(line);
             }
             rawInput = buffer.toString();
-
+            Log.d(TAG, "checkServer: resposeCode = " + respondseCode);
+            Log.d(TAG, "checkServer: i = " + i);
         } catch (ProtocolException e) {
             e.printStackTrace();
         } catch (MalformedURLException e) {
@@ -117,6 +135,7 @@ public class Merger extends Service implements Runnable {
                 }
             }
             if (conn != null) {
+                counter--;
                 conn.disconnect();
             }
         }
@@ -138,22 +157,21 @@ public class Merger extends Service implements Runnable {
         return null;
     }
 
-    private String generateLink(long time) {
-        return SERVER_NAME +
-                "/" +
-                API_NAME +
-                "?" +
-                Fields.ACTION +
-                "=" +
-                Actions.GET +
-                "&" +
-                Fields.TIME +
-                "=" +
-                time;
+    private String generateLink(long time) throws UnsupportedEncodingException {
+        return SERVER_NAME +"/chat.php?action=get&time=" + URLEncoder.encode(String.valueOf(time), "UTF-8");
+//                "/" +
+//                API_NAME +
+//                "?" +
+//                Fields.ACTION +
+//                "=" +
+//                Actions.GET +
+//                "&" +
+//                Fields.TIME +
+//                "=" +
+//                time;
 
     }
     private String generateLink(String msg) throws UnsupportedEncodingException {
-        String utf = "UTF-8";
         return SERVER_NAME + "/chat.php?action=send&message=" + URLEncoder.encode(msg.trim(), "UTF-8");
     }
 
@@ -185,28 +203,28 @@ public class Merger extends Service implements Runnable {
                 throw new RuntimeException("UNREAL SITUATION");
             }
         }
+        boolean success = false;
         Log.d(TAG, "sendToServer: " + lnk);
         HttpURLConnection conn = null;
         BufferedReader in = null;
-        boolean success = false;
         try {
             conn = (HttpURLConnection) new URL(lnk).openConnection();
+            counter++;
             conn.setReadTimeout(15000);
             conn.setConnectTimeout(15000);
             conn.setRequestMethod("POST");
             conn.setRequestProperty("User-Agent", "Mozilla/5.0");
-            conn.setDoInput(true);
             conn.connect();
-            in = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
-            while (in.ready() && !success) {
-                success =  in.readLine().contains(Fields.SUCCESS + "");
-            }
+            success = HttpURLConnection.HTTP_OK == conn.getResponseCode();
         } catch (MalformedURLException e) {
             e.printStackTrace();
+            Log.d(TAG, "sendToServer: malformed");
         } catch (IOException e) {
             e.printStackTrace();
+            Log.d(TAG, "sendToServer: ioex");
         } finally {
             if (conn != null) {
+                counter--;
                 conn.disconnect();
             }
             if (in != null) {
@@ -217,7 +235,8 @@ public class Merger extends Service implements Runnable {
                 }
             }
         }
-//        Log.d(TAG, "sendToServer: success = " + success);
+
+        Log.d(TAG, "sendToServer: success = " + success);
         return success;
     }
 
