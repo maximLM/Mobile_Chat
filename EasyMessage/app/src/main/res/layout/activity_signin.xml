@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+
+    <EditText
+        android:id="@+id/username"
+        android:hint="Username"
+        android:layout_width="200dp"
+        android:layout_height="50dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="154dp"
+        android:layout_centerHorizontal="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="WELCOME"
+        android:textSize="40dp"
+        android:layout_marginTop="60dp"
+        android:layout_alignLeft="@id/username"/>
+
+    <EditText
+        android:id="@+id/password"
+        android:hint="Password"
+        android:layout_width="200dp"
+        android:layout_height="50dp"
+        android:layout_marginBottom="259dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true" />
+
+    <Button
+        android:id="@+id/signup"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Sign up"
+        android:layout_alignParentBottom="true"
+        android:layout_alignLeft="@id/password"
+        android:layout_marginBottom="198dp"/>
+    <Button
+        android:id="@+id/signin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Sign In"
+        android:layout_alignParentBottom="true"
+        android:layout_alignRight="@+id/password"
+        android:layout_marginBottom="198dp">
+
+    </Button>
+</RelativeLayout>
