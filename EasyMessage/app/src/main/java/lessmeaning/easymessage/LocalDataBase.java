@@ -107,8 +107,9 @@ public class LocalDataBase extends SQLiteOpenHelper implements BaseColumns {
     public long getLastTime() {
         SQLiteDatabase chatDB = this.getWritableDatabase();
         Cursor c = chatDB.query(TABLE_NAME_APPROVED, null, null, null, null, null, null);
-        c.moveToLast();
-        long lastTime = c.getLong(c.getColumnIndex(TIME));
+        long lastTime = 0;
+        if (c.moveToLast())
+            lastTime = c.getLong(c.getColumnIndex(TIME));
         c.close();
         return  lastTime;
     }
