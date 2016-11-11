@@ -4,6 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:background="#1abc9c"
     tools:context="lessmeaning.easymessage.MessagesActivity">
 
         <ListView
@@ -23,13 +24,12 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="2"
-                android:hint="Write your message here!"/>
+                android:hint="Write your message here!" />
             <Button
                 android:id="@+id/button"
-                android:text="send"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="6"/>
+                android:layout_width="69dp"
+                android:layout_height="wrap_content"
+                android:background="@mipmap/send_button" />
             </LinearLayout>
 
 </LinearLayout>

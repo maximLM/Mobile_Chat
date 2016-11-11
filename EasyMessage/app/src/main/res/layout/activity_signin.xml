@@ -1,32 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
+    android:layout_height="match_parent"
+    android:background="#1abc9c">
+    rgb(231, 76, 60)
 
     <EditText
         android:id="@+id/username"
+        android:singleLine="true"
+        android:gravity="center"
+        android:background="@drawable/field_ic"
         android:hint="Username"
         android:layout_width="200dp"
         android:layout_height="50dp"
         android:layout_gravity="center"
-        android:layout_marginTop="154dp"
-        android:layout_centerHorizontal="true" />
+        android:layout_marginTop="134dp"
+        android:layout_centerHorizontal="true"/>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="WELCOME"
+        android:textStyle="bold"
+        android:textColor="#e74c3c"
         android:textSize="40dp"
         android:layout_marginTop="60dp"
         android:layout_alignLeft="@id/username"/>
 
     <EditText
         android:id="@+id/password"
+        android:maxLines="1"
         android:hint="Password"
+        android:inputType="textPassword"
+        android:gravity="center"
+        android:background="@drawable/field_ic"
         android:layout_width="200dp"
         android:layout_height="50dp"
-        android:layout_marginBottom="259dp"
+        android:layout_marginBottom="269dp"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true" />
 
@@ -37,7 +47,8 @@
         android:text="Sign up"
         android:layout_alignParentBottom="true"
         android:layout_alignLeft="@id/password"
-        android:layout_marginBottom="198dp"/>
+        android:layout_marginBottom="198dp"
+        android:background="@drawable/button_ic"/>
     <Button
         android:id="@+id/signin"
         android:layout_width="wrap_content"
@@ -45,7 +56,18 @@
         android:text="Sign In"
         android:layout_alignParentBottom="true"
         android:layout_alignRight="@+id/password"
-        android:layout_marginBottom="198dp">
+        android:layout_marginBottom="198dp"
+        android:background="@drawable/button_ic">
 
     </Button>
+
+    <CheckBox
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@+id/signup"
+        android:layout_marginTop="340dp"
+        android:text="Show password"
+        android:textSize="18dp"
+        android:id="@+id/checkBox"
+        android:layout_alignLeft="@+id/signup" />
 </RelativeLayout>

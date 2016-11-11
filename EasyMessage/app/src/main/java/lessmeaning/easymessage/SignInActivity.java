@@ -5,8 +5,11 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.text.method.PasswordTransformationMethod;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 
 /**
@@ -19,7 +22,8 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
     private EditText password;
     private Button signIn;
     private Button signUp;
-    AlertDialog.Builder dialog;
+    private AlertDialog.Builder dialog;
+    private CheckBox mCheck;
     //LocalCore localCore = new LocalCore(this);
 
     @Override
@@ -37,8 +41,21 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
         });
         userName = (EditText) findViewById(R.id.username);
         password = (EditText) findViewById(R.id.password);
+        mCheck = (CheckBox) findViewById(R.id.checkBox);
         signIn = (Button) findViewById(R.id.signin);
         signUp = (Button) findViewById(R.id.signup);
+        mCheck.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (!isChecked) {
+                    password.setTransformationMethod(new PasswordTransformationMethod());
+                }
+                else {
+                    password.setTransformationMethod(null);
+                }
+                password.setSelection(password.length());
+            }
+        });
         signIn.setOnClickListener(this);
         signUp.setOnClickListener(this);
     }
@@ -49,9 +66,13 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
             case (R.id.signin):
                 //localCore.signin(userName.getText().toString(), password.getText().toString());
                 success();
+                userName.setText("");
+                password.setText("");
                 break;
             case (R.id.signup):
                 //localCore.signup(userName.getText().toString(), password.getText().toString());
+                userName.setText("");
+                password.setText("");
                 break;
         }
     }
