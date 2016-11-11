@@ -48,9 +48,18 @@ public class LocalCore {
     }
 
     private void connectToService() {
+        try {
+            activity.unregisterReceiver(brv);
+        } catch (IllegalArgumentException e) {
+//            do nothing;
+        }
         activity.registerReceiver(brv, new IntentFilter(BROADCAST));
-        if (isServiceRunning(Merger.class, activity))
+        if (isServiceRunning(Merger.class, activity)) {
+            Log.d("supertesting", "connectToService: already running");
             return;
+        } else {
+            Log.d("supertesting", "connectToService: starrt");
+        }
         Intent intent = new Intent(activity, Merger.class);
         activity.startService(intent);
     }
