@@ -2,25 +2,23 @@ package lessmeaning.easymessage;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
-import android.os.Build;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+public class MessagesActivity extends AppCompatActivity implements View.OnClickListener {
 
-    Button mButton;
-    ListView mListView;
-    LocalCore localCore;
-    EditText mEditText;
+    private Button mButton;
+    private ListView mListView;
+    private LocalCore localCore;
+    private EditText mEditText;
 
 
    void ask(final String permission) {
@@ -58,7 +56,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         ask(Manifest.permission.CALL_PHONE);
         ask(Manifest.permission.READ_PHONE_STATE);
         Log.d("supertesting", "onCreate: debug available");
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_messages);
         localCore = new LocalCore(this);
         mButton = (Button) findViewById(R.id.button);
         mEditText = (EditText) findViewById(R.id.editText);

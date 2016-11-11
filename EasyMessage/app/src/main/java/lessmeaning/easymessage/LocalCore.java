@@ -17,10 +17,10 @@ public class LocalCore {
 
     private LocalDataBase db;
     private BroadcastReceiver brv;
-    private MainActivity activity;
+    private MessagesActivity activity;
     public static final String BROADCAST = "LESSMEANING.CHATMOBILE.HEY";
 
-    public LocalCore(MainActivity activity) {
+    public LocalCore(MessagesActivity activity) {
         this.activity = activity;
         db = new LocalDataBase(activity);
         brv = new BroadcastReceiver() {
