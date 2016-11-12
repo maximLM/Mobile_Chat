@@ -5,6 +5,8 @@ package lessmeaning.easymessage;
  */
 
 public class Conversation {
+
+    private String userName;
     private String friend;
     private long conversationID;
     private long time;
@@ -14,6 +16,8 @@ public class Conversation {
         this.friend = friend;
         this.time = time;
     }
+
+    public String getUserName() { return userName; }
 
     public long getTime() { return time; }
 

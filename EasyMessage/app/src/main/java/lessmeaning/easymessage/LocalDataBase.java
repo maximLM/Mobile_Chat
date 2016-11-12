@@ -44,6 +44,7 @@ public class LocalDataBase extends SQLiteOpenHelper implements BaseColumns {
                 + KEY_ID + " integer primary key autoincrement,"
                 + CONVERSATION_ID + " integer,"
                 + CONTENT + " text);");
+
         db.execSQL("create table " + TABLE_NAME_CONVERSATION + " ("
                 + KEY_ID + " integer primary key autoincrement,"
                 + CONVERSATION_ID + " integer,"
@@ -91,9 +92,10 @@ public class LocalDataBase extends SQLiteOpenHelper implements BaseColumns {
         Cursor c = chatDB.query(TABLE_NAME_TEMP , null, null, null, null, null, null);
         if (c.moveToFirst()){
             do {
+                long id = c.getInt(c.getColumnIndex(KEY_ID));
                 long conversationID = c.getInt(c.getColumnIndex(CONVERSATION_ID));
                 String content = c.getString(c.getColumnIndex(CONTENT));
-                alTemp.add(new TempRow(conversationID, content));
+                alTemp.add(new TempRow(conversationID, content, id));
             } while (c.moveToNext());
         }
         c.close();
@@ -149,20 +151,64 @@ public class LocalDataBase extends SQLiteOpenHelper implements BaseColumns {
         ChatDB.close();
     }
 
-    public long getLastTime() {
+    private int count(String tableName) {
         SQLiteDatabase chatDB = this.getWritableDatabase();
-        Cursor c = chatDB.query(TABLE_NAME_APPROVED, null, null, null, null, null, null);
-        long lastTime = 0;
-        if (c.moveToLast())
-            lastTime = c.getLong(c.getColumnIndex(TIME));
+        Cursor c = chatDB.query(tableName , null, null, null, null, null, null);
+        int count = c.getCount();
         c.close();
-        return  lastTime;
+
+        return count;
     }
 
-     /*public void deleteEverything() {
-        SQLiteDatabase db;
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME_APPROVED);
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME_CONVERSATION);
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME_TEMP);
-    }*/
+
+    public void setConversations(ArrayList<Conversation> covs) {
+        try {
+            if (0 != count(TABLE_NAME_CONVERSATION))
+                throw new NullPointerException();
+            addConversations(covs);
+        }
+        catch (NullPointerException e) {
+
+        }
+    }
+
+    public void setApproved(ArrayList<Row> rows) {
+        try {
+            if (0 != count(TABLE_NAME_APPROVED))
+                throw new NullPointerException();
+            addApproved(rows);
+        }
+        catch (NullPointerException e) {
+
+        }
+    }
+
+    public long getLastTimeMess() {
+        SQLiteDatabase chatDB = this.getWritableDatabase();
+        Cursor c = chatDB.query(TABLE_NAME_APPROVED, null, null, null, null, null, null);
+        long lastTimeMess = 0;
+        if (c.moveToLast())
+            lastTimeMess = c.getLong(c.getColumnIndex(TIME));
+        c.close();
+        return  lastTimeMess;
+    }
+
+    public long getLastTimeConv() {
+        SQLiteDatabase chatDB = this.getWritableDatabase();
+        Cursor c = chatDB.query(TABLE_NAME_CONVERSATION, null, null, null, null, null, null);
+        long lastTimeConv = 0;
+        if (c.moveToLast())
+            lastTimeConv = c.getLong(c.getColumnIndex(TIME));
+        c.close();
+        return  lastTimeConv;
+    }
+
+     public void deleteEverything() {
+        SQLiteDatabase hatDB = this.getWritableDatabase();
+         SQLiteDatabase chatDB = this.getWritableDatabase();
+         chatDB.delete(TABLE_NAME_TEMP, null, null);
+         chatDB.delete(TABLE_NAME_CONVERSATION, null, null);
+         chatDB.delete(TABLE_NAME_APPROVED, null, null);
+         Log.d(myLog, "Temp delete");
+    }
 }
