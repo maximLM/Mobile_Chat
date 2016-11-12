@@ -204,7 +204,6 @@ public class Merger extends Service implements Runnable {
             }
         }
         boolean success = false;
-        Log.d(TAG, "sendToServer: " + lnk);
         HttpURLConnection conn = null;
         BufferedReader in = null;
         try {
@@ -237,6 +236,7 @@ public class Merger extends Service implements Runnable {
         }
 
         Log.d(TAG, "sendToServer: success = " + success);
+        Log.d(TAG, "sendToServer: lnk = " + lnk);
         return success;
     }
 
