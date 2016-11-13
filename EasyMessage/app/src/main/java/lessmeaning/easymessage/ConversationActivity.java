@@ -1,11 +1,13 @@
 package lessmeaning.easymessage;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
@@ -46,6 +48,7 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
     public void onClick(View v) {
         switch (v.getId()) {
             case (R.id.create_button):
+                hideKeayboard();
                 //localCore.createConversation(String username);
                 success();
                 break;
@@ -65,5 +68,13 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
     public void success() {
         Intent intent = new Intent(this, MessagesActivity.class);
         startActivity(intent);
+    }
+
+    public void hideKeayboard() {
+        View view = this.getCurrentFocus();
+        if (view != null) {
+            InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
     }
 }

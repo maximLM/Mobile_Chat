@@ -39,12 +39,12 @@ public class LocalCore {
     public void sendApproved() {
         ArrayList<Row> rows = db.getApproved();
         Collections.sort(rows);
-        int len = rows.size();
+        /*int len = rows.size();
         String values[] = new String[len];
         for (int i = 0; i < len; i++) {
             values[i] = rows.get(i).getContent();
-        }
-        activity.reloadList(values);
+        }*/
+        activity.reloadList(rows);
     }
 
     private void connectToService() {

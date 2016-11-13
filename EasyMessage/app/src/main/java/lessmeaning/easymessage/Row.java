@@ -24,4 +24,5 @@ class Row implements Comparable<Row> {
     public long getTime() {
         return time;
     }
+
 }
