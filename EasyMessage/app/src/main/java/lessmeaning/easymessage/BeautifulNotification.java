@@ -7,8 +7,6 @@ import android.content.Intent;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 
-import static java.lang.System.currentTimeMillis;
-
 /**
  * Created by пользователь on 08.11.2016.
  */
@@ -16,7 +14,7 @@ import static java.lang.System.currentTimeMillis;
 public class BeautifulNotification  {
 
     public static void showMessageNotification (Context context, String msg, String sender) {
-        Intent intent = new Intent(context, MainActivity.class);
+        Intent intent = new Intent(context, MessagesActivity.class);
         PendingIntent pIntent = PendingIntent.getActivity(context, 0, intent, 0);
 
         Notification notification = new NotificationCompat.Builder(context)
