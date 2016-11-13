@@ -1,10 +1,8 @@
 package lessmeaning.easymessage;
 
-import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.IBinder;
@@ -50,10 +48,8 @@ public class Merger extends Service implements Runnable {
     @Override
     public void run() {
         while (running) {
-            String msg = checkServer();
-            if (msg != null) {
-                sendMsgToUpd(msg);
-            }
+            checkServer();
+
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
@@ -62,117 +58,17 @@ public class Merger extends Service implements Runnable {
         }
     }
 
-    private String checkServer() {
-        String res = getConversations();
-        if (res != null) return res;
-        res = getMessages();
-        return res;
-    }
-
-    private String getRaw(String lnk) {
-        BufferedReader in = null;
-        HttpURLConnection conn = null;
-        String rawInput = null;
-        try {
-            conn = (HttpURLConnection) new URL(lnk).openConnection();
-            conn.setRequestMethod("POST");
-            conn.setRequestProperty("USER-AGENT", "Mozilla/5.0");
-            conn.setRequestProperty("ACCEPT-LANGUAGE", "en-US,en;0.5");
-            conn.setDoOutput(true);
-
-            int respondseCode = conn.getResponseCode();
-            in = new BufferedReader(
-                    new InputStreamReader(conn.getInputStream()));
-            StringBuilder buffer = new StringBuilder();
-            String line = "";
-            while ((line = in.readLine()) != null) {
-                buffer.append(line);
-            }
-            rawInput = buffer.toString();
-            Log.d(TAG, "checkServer: responseCode = " + respondseCode);
-        } catch (ProtocolException e) {
-            e.printStackTrace();
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if (in != null) {
-                try {
-                    in.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            if (conn != null) {
-                conn.disconnect();
-            }
-        }
-        if (rawInput == null || rawInput.equals("")) return null;
-        return rawInput;
-    }
-
-    private String getConversations() {
-        String lnk = null;
-        long time = localdb.getLastTimeConv();
-        try {
-            lnk = "http://e-chat.h1n.ru/getconversations.php?user=" +
-                    URLEncoder.encode(localdb.getUserName(), "UTF-8")
-                    + "&time=" + URLEncoder.encode(String.valueOf(time), "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        String rawInput = getRaw(lnk);
-        if (rawInput == null) return null;
-        try {
-            ArrayList<Conversation> convs = convertConversation(rawInput);
-            if (convs == null || convs.size() == 0) return null;
+    private void checkServer() {
+        ArrayList<Conversation> convs = ServerConnection.getConversations(localdb.getUserName(), localdb.getLastTimeConv());
+        if (convs != null && convs.size() > 0) {
             localdb.addConversations(convs);
-            return "New conversation with " + convs.get(0).getFriend();
-        } catch (JSONException e) {
-            e.printStackTrace();
+            sendMsgToUpd("New Conversation with " + convs.get(convs.size() - 1).getFriend(), true);
         }
-        return null;
-    }
-
-    private ArrayList<Conversation> convertConversation(String rawInput) throws JSONException {
-        ArrayList<Conversation> res = new ArrayList<>();
-        JSONArray array = new JSONArray(rawInput);
-        JSONObject row;
-        int len = array.length();
-        for (int i = 0; i < len; i++) {
-            row = array.getJSONObject(i);
-            res.add(new Conversation(row.getLong(Fields.CONVERSATION + ""),
-                    row.getString(Fields.AUTHOR + ""),
-                    row.getLong(Fields.TIME + "")));
-            Log.d(TAG, "convertConversation: conv is " + res.get(res.size() - 1).getFriend());
-        }
-        Collections.sort(res);
-        return res;
-    }
-
-    private String getMessages() {
-        long time = localdb.getLastTimeMess();
-        String lnk = null;
-        try {
-            lnk = "http://e-chat.h1n.ru/getmessages.php?user=" +
-                    URLEncoder.encode(localdb.getUserName(), "UTF-8")
-            +"&time=" + URLEncoder.encode(String.valueOf(time), "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        String rawInput = getRaw(lnk);
-        if (rawInput == null || rawInput.equals("")) return null;
-        try {
-            ArrayList<Row> rows = convertMessage(rawInput);
-            if (rows == null || rows.size() == 0)
-                return null;
+        ArrayList<Row> rows = ServerConnection.getMessages(localdb.getUsername(), localdb.getLastTimeMess());
+        if (rows != null && rows.size() > 0) {
             localdb.addApproved(rows);
-            return rows.get(0).getContent();
-        } catch (JSONException e) {
-            e.printStackTrace();
+            sendMsgToUpd(rows.get(rows.size() - 1).getContent(), false);
         }
-        return null;
     }
 
     private String generateLink(long convID, String msg) throws UnsupportedEncodingException {
@@ -181,24 +77,6 @@ public class Merger extends Service implements Runnable {
                 URLEncoder.encode(String.valueOf(convID))
                 + "&message=" + URLEncoder.encode(msg.trim(), "UTF-8");
     }
-
-    private ArrayList<Row> convertMessage(String rawInput) throws JSONException {
-        ArrayList<Row> res = new ArrayList<>();
-        JSONArray array = new JSONArray(rawInput);
-        JSONObject row;
-        int len = array.length();
-        for (int i = 0; i < len; i++) {
-            row = array.getJSONObject(i);
-            res.add(new Row(row.getLong(Fields.CONVERSATION + ""),
-                    row.getString(Fields.AUTHOR + ""),
-                    row.getString(Fields.MESSAGE + ""),
-                    row.getLong(Fields.TIME + "")));
-            Log.d(TAG, "convertMessage: row is " + res.get(res.size() - 1).getContent());
-        }
-        Collections.sort(res);
-        return res;
-    }
-
 
     private boolean sendToServer(long convID, String msg) {
         String lnk = null;
@@ -256,17 +134,18 @@ public class Merger extends Service implements Runnable {
             success = sendToServer(freshRows.get(i).getConversationID(),
                     freshRows.get(i).getContent());
             if (success) {
-                localdb.deleteTemp(freshRows.get(i).getID());
+                localdb.deleteTemp((int) freshRows.get(i).getId());
             }
         }
     }
 
-    private void sendMsgToUpd(String msg) {
-        sendBroadcast(new Intent(LocalCore.BROADCAST));
-        Intent intent = new Intent(this, MessageReceiver.class);
+    private void sendMsgToUpd(String msg, boolean isConv) {
+        Intent intent = new Intent(LocalCore.BROADCAST);
+        intent.putExtra(LocalCore.IS_CONVERSATION, isConv);
+        sendBroadcast(intent);
+        intent = new Intent(this, MessageReceiver.class);
         intent.putExtra(MessageReceiver.MESSAGE, msg);
         sendBroadcast(intent);
-
     }
 
     @Override

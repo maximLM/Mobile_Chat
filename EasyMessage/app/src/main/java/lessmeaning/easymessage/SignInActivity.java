@@ -24,7 +24,7 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
     private Button signUp;
     private AlertDialog.Builder dialog;
     private CheckBox mCheck;
-    //LocalCore localCore = new LocalCore(this);
+    LocalCore localCore = new LocalCore(this);
 
     @Override
     protected void onCreate(Bundle SavedInstanceState) {
@@ -64,13 +64,13 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
     public void onClick(View v) {
         switch (v.getId()) {
             case (R.id.signin):
-                //localCore.signin(userName.getText().toString(), password.getText().toString());
+                localCore.signin(userName.getText().toString(), password.getText().toString());
                 success();
                 userName.setText("");
                 password.setText("");
                 break;
             case (R.id.signup):
-                //localCore.signup(userName.getText().toString(), password.getText().toString());
+                localCore.signup(userName.getText().toString(), password.getText().toString());
                 userName.setText("");
                 password.setText("");
                 break;
