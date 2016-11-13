@@ -57,8 +57,9 @@ public class Merger extends Service implements Runnable {
 
     @Override
     public void onTaskRemoved(Intent rootIntent) {
-        running = false;
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            running = false;
             Intent restartIntent = new Intent(this, getClass());
 
             AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
@@ -72,7 +73,7 @@ public class Merger extends Service implements Runnable {
     @Override
     public void run() {
         Log.d(TAG, "run: inLoooop");
-        while (true) { // TODO replace with running
+        while (running) {
             checkLocal();
             String msg = checkServer();
             if (msg != null) {
@@ -159,18 +160,8 @@ public class Merger extends Service implements Runnable {
 
     private String generateLink(long time) throws UnsupportedEncodingException {
         return SERVER_NAME +"/chat.php?action=get&time=" + URLEncoder.encode(String.valueOf(time), "UTF-8");
-//                "/" +
-//                API_NAME +
-//                "?" +
-//                Fields.ACTION +
-//                "=" +
-//                Actions.GET +
-//                "&" +
-//                Fields.TIME +
-//                "=" +
-//                time;
-
     }
+
     private String generateLink(String msg) throws UnsupportedEncodingException {
         return SERVER_NAME + "/chat.php?action=send&message=" + URLEncoder.encode(msg.trim(), "UTF-8");
     }
@@ -195,7 +186,6 @@ public class Merger extends Service implements Runnable {
         String lnk = null;
         try {
             lnk = generateLink(msg);
-//            lnk = URLEncoder.encode(lnk, "UTF-8");
         } catch (UnsupportedEncodingException e) {
             try {
                 lnk = generateLink("unsupportedencodingwashere");
