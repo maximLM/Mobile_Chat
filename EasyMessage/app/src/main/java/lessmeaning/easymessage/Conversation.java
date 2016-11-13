@@ -5,6 +5,7 @@ package lessmeaning.easymessage;
  */
 
 public class Conversation implements Comparable<Conversation> {
+
     private String friend;
     private long conversationID;
     private long time;
