@@ -68,6 +68,33 @@ public class LocalDataBase extends SQLiteOpenHelper implements BaseColumns {
         chatDB.close();
     }
 
+    public void addApproved(ArrayList<Row> rows) {
+        int size = rows.size();
+        SQLiteDatabase chatDB = this.getWritableDatabase();
+        ContentValues cv = new ContentValues();
+        for (int i = 0; i < size; i++) {
+            cv.put(CONVERSATION_ID, rows.get(i).getConversationID());
+            cv.put(USER, rows.get(i).getUserSender());
+            cv.put(CONTENT , rows.get(i).getContent());
+            cv.put(TIME, rows.get(i).getTime());
+            chatDB.insert(TABLE_NAME_APPROVED, null, cv);
+        }
+        chatDB.close();
+    }
+
+    public void addConversations(ArrayList<Conversation> convs) {
+        int size = convs.size();
+        SQLiteDatabase ChatDB = this.getWritableDatabase();
+        ContentValues cv = new ContentValues();
+        for (int i = 0; i < size; i++){
+            cv.put(CONVERSATION_ID, convs.get(i).getConversationID());
+            cv.put(USER, convs.get(i).getFriend());
+            cv.put(TIME, convs.get(i).getTime());
+            ChatDB.insert(TABLE_NAME_CONVERSATION, null, cv);
+        }
+        ChatDB.close();
+    }
+
     public ArrayList<Row> getApproved() {
         ArrayList<Row> row = new ArrayList();
         SQLiteDatabase chatDB = this.getWritableDatabase();
@@ -118,37 +145,31 @@ public class LocalDataBase extends SQLiteOpenHelper implements BaseColumns {
         return alTemp;
     }
 
+    public void setConversations(ArrayList<Conversation> covs) throws NullPointerException{
+        if (0 != count(TABLE_NAME_CONVERSATION))
+            throw new NullPointerException();
+        addConversations(covs);
+    }
+
+    public void setApproved(ArrayList<Row> rows) throws NullPointerException{
+        if (0 != count(TABLE_NAME_APPROVED))
+            throw new NullPointerException();
+        addApproved(rows);
+    }
+
     public void deleteTemp(int id) {
         SQLiteDatabase chatDB = this.getWritableDatabase();
         chatDB.delete(TABLE_NAME_TEMP, KEY_ID + "=" + id, null);
         chatDB.close();
     }
 
-    public void addApproved(ArrayList<Row> rows) {
-        int size = rows.size();
+    public void deleteEverything() {
+        SQLiteDatabase hatDB = this.getWritableDatabase();
         SQLiteDatabase chatDB = this.getWritableDatabase();
-        ContentValues cv = new ContentValues();
-        for (int i = 0; i < size; i++) {
-            cv.put(CONVERSATION_ID, rows.get(i).getConversationID());
-            cv.put(USER, rows.get(i).getUserSender());
-            cv.put(CONTENT , rows.get(i).getContent());
-            cv.put(TIME, rows.get(i).getTime());
-            chatDB.insert(TABLE_NAME_APPROVED, null, cv);
-        }
-        chatDB.close();
-    }
-
-    public void addConversations(ArrayList<Conversation> convs) {
-        int size = convs.size();
-        SQLiteDatabase ChatDB = this.getWritableDatabase();
-        ContentValues cv = new ContentValues();
-        for (int i = 0; i < size; i++){
-            cv.put(CONVERSATION_ID, convs.get(i).getConversationID());
-            cv.put(USER, convs.get(i).getFriend());
-            cv.put(TIME, convs.get(i).getTime());
-            ChatDB.insert(TABLE_NAME_CONVERSATION, null, cv);
-        }
-        ChatDB.close();
+        chatDB.delete(TABLE_NAME_TEMP, null, null);
+        chatDB.delete(TABLE_NAME_CONVERSATION, null, null);
+        chatDB.delete(TABLE_NAME_APPROVED, null, null);
+        Log.d(myLog, "Temp delete");
     }
 
     private int count(String tableName) {
@@ -158,29 +179,6 @@ public class LocalDataBase extends SQLiteOpenHelper implements BaseColumns {
         c.close();
 
         return count;
-    }
-
-
-    public void setConversations(ArrayList<Conversation> covs) {
-        try {
-            if (0 != count(TABLE_NAME_CONVERSATION))
-                throw new NullPointerException();
-            addConversations(covs);
-        }
-        catch (NullPointerException e) {
-
-        }
-    }
-
-    public void setApproved(ArrayList<Row> rows) {
-        try {
-            if (0 != count(TABLE_NAME_APPROVED))
-                throw new NullPointerException();
-            addApproved(rows);
-        }
-        catch (NullPointerException e) {
-
-        }
     }
 
     public long getLastTimeMess() {
@@ -203,12 +201,17 @@ public class LocalDataBase extends SQLiteOpenHelper implements BaseColumns {
         return  lastTimeConv;
     }
 
-     public void deleteEverything() {
-        SQLiteDatabase hatDB = this.getWritableDatabase();
-         SQLiteDatabase chatDB = this.getWritableDatabase();
-         chatDB.delete(TABLE_NAME_TEMP, null, null);
-         chatDB.delete(TABLE_NAME_CONVERSATION, null, null);
-         chatDB.delete(TABLE_NAME_APPROVED, null, null);
-         Log.d(myLog, "Temp delete");
+    public String getUsername() {
+        String username = "";
+        SQLiteDatabase chatDB = this.getWritableDatabase();
+        Cursor c = chatDB.query(TABLE_NAME_CONVERSATION, null, null, null, null, null, null);
+        if (c.moveToFirst())
+            username = c.getString(c.getColumnIndex(USER));
+        c.close();
+
+        return username;
+
     }
+
+
 }
