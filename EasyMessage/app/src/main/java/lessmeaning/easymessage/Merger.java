@@ -59,7 +59,7 @@ public class Merger extends Service implements Runnable {
     }
 
     private void checkServer() {
-        ArrayList<Conversation> convs = ServerConnection.getConversations(localdb.getUserName(), localdb.getLastTimeConv());
+        ArrayList<Conversation> convs = ServerConnection.getConversations(localdb.getUsername(), localdb.getLastTimeConv());
         if (convs != null && convs.size() > 0) {
             localdb.addConversations(convs);
             sendMsgToUpd("New Conversation with " + convs.get(convs.size() - 1).getFriend(), true);
@@ -73,7 +73,7 @@ public class Merger extends Service implements Runnable {
 
     private String generateLink(long convID, String msg) throws UnsupportedEncodingException {
         return SERVER_NAME + "/send.php?user=" +
-                URLEncoder.encode(localdb.getUserName(), "UTF-8") + "&conversationID=" +
+                URLEncoder.encode(localdb.getUsername(), "UTF-8") + "&conversationID=" +
                 URLEncoder.encode(String.valueOf(convID))
                 + "&message=" + URLEncoder.encode(msg.trim(), "UTF-8");
     }
@@ -84,7 +84,8 @@ public class Merger extends Service implements Runnable {
             lnk = generateLink(convID, msg);
         } catch (UnsupportedEncodingException e) {
             try {
-                lnk = generateLink(localdb.getUserName(), "unsupportedencodingwashere");
+                lnk = generateLink(-999, "UNSUPPORTED_ENCODING_PAY_ATTENTION_USER_IS"
+                        + localdb.getUsername());
             } catch (UnsupportedEncodingException e1) {
                 throw new RuntimeException("UNREAL SITUATION");
             }

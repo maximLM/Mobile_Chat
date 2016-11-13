@@ -100,7 +100,7 @@ public class LocalCore {
 
     public void signin(final String username,final String password) {
         if (clazz != SignInActivity.class) return;
-        if (db.getUserName() != null)
+        if (db.getUsername() != null)
             ((SignInActivity)activity).fail("You are already logged");
         if (!ServerConnection.checkConnection(activity))
             ((SignInActivity)activity).fail("No Connection");

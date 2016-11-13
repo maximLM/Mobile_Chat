@@ -145,15 +145,15 @@ public class LocalDataBase extends SQLiteOpenHelper implements BaseColumns {
         return alTemp;
     }
 
-    public void setConversations(ArrayList<Conversation> covs) throws NullPointerException{
+    public void setConversations(ArrayList<Conversation> covs) throws UnsupportedOperationException{
         if (0 != count(TABLE_NAME_CONVERSATION))
-            throw new NullPointerException();
+            throw new UnsupportedOperationException();
         addConversations(covs);
     }
 
-    public void setApproved(ArrayList<Row> rows) throws NullPointerException{
+    public void setApproved(ArrayList<Row> rows) throws UnsupportedOperationException{
         if (0 != count(TABLE_NAME_APPROVED))
-            throw new NullPointerException();
+            throw new UnsupportedOperationException();
         addApproved(rows);
     }
 
