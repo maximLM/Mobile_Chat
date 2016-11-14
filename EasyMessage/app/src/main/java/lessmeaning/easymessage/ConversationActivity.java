@@ -8,9 +8,12 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -21,7 +24,7 @@ import java.util.ArrayList;
 public class ConversationActivity extends AppCompatActivity implements View.OnClickListener {
 
     private Button mCreate;
-    private ArrayAdapter<String> adapter;
+    private ConversationAdapter adapter;
     private ListView mListView;
     //private LocalCore localCore = new LocalCore();
     private AlertDialog.Builder dialog;
@@ -33,6 +36,18 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
         mCreate = (Button) findViewById(R.id.create_button);
         mListView = (ListView) findViewById(R.id.conversations);
         mCreate.setOnClickListener(this);
+        ArrayList<Conversation> list = new ArrayList<>();
+        for (int i = 0; i < 2; i++) {
+            list.add(new Conversation(i, "Maxim", i * i * i * i));
+        }
+        adapter = new ConversationAdapter(this, list);
+        mListView.setAdapter(adapter);
+        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                fail("wow");
+            }
+        });
         dialog = new AlertDialog.Builder(this);
         dialog.setTitle("Error!");
         dialog.setCancelable(true);
@@ -58,8 +73,8 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
     }
 
     public void reloadList(ArrayList<Conversation> convs) {
-//        adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, rows);
-//        mListView.setAdapter(adapter);
+        adapter = new ConversationAdapter(this, convs);
+        mListView.setAdapter(adapter);
     }
 
     public void fail(String reason) {
