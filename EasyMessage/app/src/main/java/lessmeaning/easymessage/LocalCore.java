@@ -60,7 +60,8 @@ public class LocalCore {
     }
 
     public void sendApproved() {
-        ArrayList<Row> rows = db.getApproved();
+        if (clazz != MessagesActivity.class) return;
+        ArrayList<Row> rows = db.getApproved(convID);
         Collections.sort(rows);
 
         ((MessagesActivity)activity).reloadList(rows);
@@ -76,7 +77,7 @@ public class LocalCore {
         return false;
     }
 
-    private void connectToService() {
+    public void connectToService() {
         try {
             if (brv != null) activity.unregisterReceiver(brv);
         } catch (IllegalArgumentException e) { }
