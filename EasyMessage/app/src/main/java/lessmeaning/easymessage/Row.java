@@ -7,9 +7,16 @@ class Row implements Comparable<Row> {
     private String content;
     private long time;
 
-    public Row(String content, long time) {
+
+
+    private long conversationID;
+    private String userSender;
+
+    public Row(long conversationID, String userSender, String content, long time) {
         this.content = content;
         this.time = time;
+        this.conversationID = conversationID;
+        this.userSender = userSender;
     }
 
     @Override
@@ -25,4 +32,8 @@ class Row implements Comparable<Row> {
         return time;
     }
 
+
+    public long getConversationID() { return conversationID; }
+
+    public String getUserSender() { return userSender; }
 }

@@ -12,6 +12,8 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 
+import java.util.ArrayList;
+
 /**
  * Created by 1 on 11.11.2016.
  */
@@ -23,9 +25,6 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
     private ListView mListView;
     //private LocalCore localCore = new LocalCore();
     private AlertDialog.Builder dialog;
-//old
-//    old
-//    old
 
     @Override
     protected void onCreate(Bundle SavedInstanceState) {
@@ -58,9 +57,9 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
         }
     }
 
-    public void reloadList(String rows[]) {
-        adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, rows);
-        mListView.setAdapter(adapter);
+    public void reloadList(ArrayList<Conversation> convs) {
+//        adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, rows);
+//        mListView.setAdapter(adapter);
     }
 
     public void fail(String reason) {
