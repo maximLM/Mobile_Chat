@@ -12,6 +12,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 
 /**
  * Created by Максим on 03.11.2016.
@@ -60,7 +61,8 @@ public class LocalCore {
     }
 
     public void sendApproved() {
-        ArrayList<Row> rows = db.getApproved();
+        if (clazz != MessagesActivity.class) return;
+        ArrayList<Row> rows = db.getApproved(convID);
         Collections.sort(rows);
 
         ((MessagesActivity)activity).reloadList(rows);
@@ -141,10 +143,22 @@ public class LocalCore {
         }
         ArrayList<Conversation> convs = new ArrayList<>();
         convs.add(new Conversation(-12, username, 0));
-        convs.addAll(ServerConnection.getConversations(username, 0));
+        String names[] = new String[] {"Shmidt", "Max", "Timur", "Vlad", "Sonya"};
+        for (int i = 0; i < names.length; i++) {
+            convs.add(new Conversation(i, names[i], (long) (i * i * Math.PI)));
+        }
+        ArrayList<Row> rows = new ArrayList<>();
+        final int SIZE = 34;
+        for(Conversation conv : convs) {
+            for (int i = 0; i < SIZE; i++) {
+                rows.add(new Row(conv.getConversationID(),
+                        i % 2 == 0 ? username : conv.getFriend(),
+                        "HEy i is " + i, new Date(System.currentTimeMillis() * i / SIZE).getTime()));
+            }
+        }
         try {
             db.setConversations(convs);
-            db.setApproved(ServerConnection.getMessages(username, 0));
+            db.setApproved(rows);
         } catch (UnsupportedOperationException e) {
             activity.runOnUiThread(new Runnable() {
                 @Override
@@ -164,34 +178,6 @@ public class LocalCore {
     }
 
     public void signup(final String username, final String password) {
-        if (clazz != SignInActivity.class) return;
-        if (db.getUsername() != null)
-            ((SignInActivity)activity).fail("You are already logged");
-        if (!ServerConnection.checkConnection(activity))
-            ((SignInActivity)activity).fail("No Connection");
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                String utf = "UTF-8";
-                String lnk = null;
-                try {
-                    lnk = "http://e-chat.h1n.ru/signup.php?username="
-                            + URLEncoder.encode(username, utf)
-                            + "&password="
-                            + URLEncoder.encode(password, utf);
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
-                    return;
-                }
-                String success = ServerConnection.executeQuery(lnk);
-                String fail = "User already exists";
-                if (success.contains("success")) {
-                    signedIn(username, fail);
-                } else {
-                    signedIn(null, fail);
-                }
-            }
-        });
+        signedIn(username, "Sign UP failed");
     }
-
 }
