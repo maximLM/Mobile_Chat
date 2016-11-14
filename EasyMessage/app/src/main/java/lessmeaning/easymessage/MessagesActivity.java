@@ -64,13 +64,25 @@ public class MessagesActivity extends AppCompatActivity implements View.OnClickL
         ask(Manifest.permission.READ_PHONE_STATE);
         Log.d("supertesting", "onCreate: debug available");
         setContentView(R.layout.activity_messages);
-        localCore = new LocalCore(this);
+        localCore = new LocalCore(this, getIntent().getIntExtra(ConversationActivity.CONVERSATION_ID, 0));
         mButton = (Button) findViewById(R.id.button);
         mEditText = (EditText) findViewById(R.id.editText);
         mListView = (ListView) findViewById(R.id.list_view);
         mButton.setOnClickListener(this);
         localCore.sendApproved();
         mEditText.setOnClickListener(this);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        localCore.disconnectService();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        //localCore.connectService(); ToDO
     }
 
     @Override

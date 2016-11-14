@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
     android:minWidth="150dp"
-    android:background="@drawable/item_draw"
+    android:background="@drawable/conv_field"
     android:layout_height="wrap_content">
 
     <LinearLayout

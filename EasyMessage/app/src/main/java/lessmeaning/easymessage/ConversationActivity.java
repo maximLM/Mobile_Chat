@@ -15,6 +15,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 
 /**
@@ -26,8 +28,9 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
     private Button mCreate;
     private ConversationAdapter adapter;
     private ListView mListView;
-    //private LocalCore localCore = new LocalCore();
+    private LocalCore localCore;
     private AlertDialog.Builder dialog;
+    public static final String CONVERSATION_ID = "CONVERSATION_ID";
 
     @Override
     protected void onCreate(Bundle SavedInstanceState) {
@@ -42,10 +45,11 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
         }
         adapter = new ConversationAdapter(this, list);
         mListView.setAdapter(adapter);
+        localCore = new LocalCore(this);
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                fail("wow");
+                goTo((int)adapter.getItem(position).getConversationID());
             }
         });
         dialog = new AlertDialog.Builder(this);
@@ -59,7 +63,17 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
         });
     }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        localCore.disconnectService();
+    }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        //localCore.connectService(); toDo
+    }
 
     @Override
     public void onClick(View v) {
@@ -67,7 +81,6 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
             case (R.id.create_button):
                 hideKeayboard();
                 //localCore.createConversation(String username);
-                success();
                 break;
         }
     }
@@ -93,5 +106,11 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
             InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
         }
+    }
+
+    public void goTo(int conversationID) {
+        Intent intent = new Intent(this, MessagesActivity.class);
+        intent.putExtra(CONVERSATION_ID, conversationID);
+        startActivity(intent);
     }
 }
