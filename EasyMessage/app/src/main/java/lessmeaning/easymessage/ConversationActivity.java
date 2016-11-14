@@ -23,6 +23,9 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
     private ListView mListView;
     //private LocalCore localCore = new LocalCore();
     private AlertDialog.Builder dialog;
+//old
+//    old
+//    old
 
     @Override
     protected void onCreate(Bundle SavedInstanceState) {
