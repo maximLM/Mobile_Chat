@@ -59,12 +59,14 @@ public class Merger extends Service implements Runnable {
     }
 
     private void checkServer() {
-        ArrayList<Conversation> convs = ServerConnection.getConversations(localdb.getUsername(), localdb.getLastTimeConv());
+        ArrayList<Conversation> convs = ServerConnection.getConversations(localdb.getUsername(),
+                localdb.getLastTimeConv());
         if (convs != null && convs.size() > 0) {
             localdb.addConversations(convs);
             sendMsgToUpd("New Conversation with " + convs.get(convs.size() - 1).getFriend(), true);
         }
-        ArrayList<Row> rows = ServerConnection.getMessages(localdb.getUsername(), localdb.getLastTimeMess());
+        ArrayList<Row> rows = ServerConnection.getMessages(localdb.getUsername(),
+                localdb.getLastTimeMess());
         if (rows != null && rows.size() > 0) {
             localdb.addApproved(rows);
             sendMsgToUpd(rows.get(rows.size() - 1).getContent(), false);

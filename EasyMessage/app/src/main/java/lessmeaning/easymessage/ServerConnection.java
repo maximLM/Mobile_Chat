@@ -19,6 +19,7 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 
 /**
  * Created by Максим on 13.11.2016.
@@ -105,7 +106,7 @@ public class ServerConnection {
         String rawInput = executeQuery(lnk);
         if (rawInput == null) return null;
         try {
-            ArrayList<Conversation> convs = convertConversation(rawInput);
+            ArrayList<Conversation> convs = convertConversation(rawInput, username);
             if (convs == null || convs.size() == 0) return null;
             return convs;
         } catch (JSONException e) {
@@ -133,15 +134,20 @@ public class ServerConnection {
         return res;
     }
 
-    private static ArrayList<Conversation> convertConversation(String rawInput) throws JSONException {
+    private static ArrayList<Conversation> convertConversation(String rawInput, String username) throws JSONException {
         ArrayList<Conversation> res = new ArrayList<>();
         JSONArray array = new JSONArray(rawInput);
         JSONObject row;
+        HashSet<Long> ids = new HashSet<>();
         int len = array.length();
         for (int i = 0; i < len; i++) {
             row = array.getJSONObject(i);
-            res.add(new Conversation(row.getLong(Fields.CONVERSATION + ""),
-                    row.getString(Fields.AUTHOR + ""),
+            long id = row.getLong(Fields.CONVERSATION + "");
+            String friend = row.getString(Fields.AUTHOR + "");
+            if (ids.contains(id) || friend.equals(username)) continue;
+            ids.add(id);
+            res.add(new Conversation(id,
+                    friend,
                     row.getLong(Fields.TIME + "")));
             Log.d(TAG, "convertConversation: conv is " + res.get(res.size() - 1).getFriend());
         }

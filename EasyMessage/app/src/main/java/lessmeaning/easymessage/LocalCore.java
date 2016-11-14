@@ -119,21 +119,22 @@ public class LocalCore {
                     return;
                 }
                 String success = ServerConnection.executeQuery(lnk);
+                String fail = "Password incorrect or user does not exists";
                 if (success.contains("success")) {
-                    signedIn(username);
+                    signedIn(username, fail);
                 } else {
-                    signedIn(null);
+                    signedIn(null, fail);
                 }
             }
         });
     }
 
-    private void signedIn(String username) {
+    private void signedIn(String username, final String fail) {
         if (username == null) {
             activity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    ((SignInActivity) activity).fail("Password or username incorrect");
+                    ((SignInActivity) activity).fail(fail);
                 }
             });
         }
@@ -161,8 +162,35 @@ public class LocalCore {
         });
     }
 
-    public void signup(String username, String password) {
-//        TODO: code this
+    public void signup(final String username, final String password) {
+        if (clazz != SignInActivity.class) return;
+        if (db.getUsername() != null)
+            ((SignInActivity)activity).fail("You are already logged");
+        if (!ServerConnection.checkConnection(activity))
+            ((SignInActivity)activity).fail("No Connection");
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                String utf = "UTF-8";
+                String lnk = null;
+                try {
+                    lnk = "http://e-chat.h1n.ru/signup.php?username="
+                            + URLEncoder.encode(username, utf)
+                            + "&password="
+                            + URLEncoder.encode(password, utf);
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                    return;
+                }
+                String success = ServerConnection.executeQuery(lnk);
+                String fail = "User already exists";
+                if (success.contains("success")) {
+                    signedIn(username, fail);
+                } else {
+                    signedIn(null, fail);
+                }
+            }
+        });
     }
 
 }
