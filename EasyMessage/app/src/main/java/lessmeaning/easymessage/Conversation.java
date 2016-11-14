@@ -9,12 +9,18 @@ public class Conversation implements Comparable<Conversation> {
     private String friend;
     private long conversationID;
     private long time;
+    private String lastRow;
 
-    public Conversation(long conversationID, String friend, long time) {
+    public Conversation(long conversationID, String friend, long time, String lastRow) {
         this.conversationID = conversationID;
         this.friend = friend;
         this.time = time;
+        this.lastRow = lastRow;
     }
+
+    public String getLastRow() { return lastRow; }
+
+    public void setLastRow(String lastRow) { this.lastRow = lastRow; }
 
     public long getTime() { return time; }
 

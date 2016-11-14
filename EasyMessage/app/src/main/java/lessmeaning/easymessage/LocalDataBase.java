@@ -49,7 +49,8 @@ public class LocalDataBase extends SQLiteOpenHelper implements BaseColumns {
                 + KEY_ID + " integer primary key autoincrement,"
                 + CONVERSATION_ID + " integer,"
                 + USER + " text,"
-                + TIME + " integer);");
+                + TIME + " integer,"
+                + CONTENT + " text);");
     }
 
     @Override
@@ -90,6 +91,7 @@ public class LocalDataBase extends SQLiteOpenHelper implements BaseColumns {
             cv.put(CONVERSATION_ID, convs.get(i).getConversationID());
             cv.put(USER, convs.get(i).getFriend());
             cv.put(TIME, convs.get(i).getTime());
+            cv.put(CONTENT, convs.get(i).getLastRow());
             ChatDB.insert(TABLE_NAME_CONVERSATION, null, cv);
         }
         ChatDB.close();
@@ -138,7 +140,8 @@ public class LocalDataBase extends SQLiteOpenHelper implements BaseColumns {
                 long conversationID = c.getInt(c.getColumnIndex(CONVERSATION_ID));
                 String friend = c.getString(c.getColumnIndex(USER));
                 long time = c.getInt(c.getColumnIndex(TIME));
-                alTemp.add(new Conversation(conversationID, friend, time));
+                String lastRow = c.getString(c.getColumnIndex(CONTENT));
+                alTemp.add(new Conversation(conversationID, friend, time, lastRow));
             } while (c.moveToNext());
         }
         c.close();

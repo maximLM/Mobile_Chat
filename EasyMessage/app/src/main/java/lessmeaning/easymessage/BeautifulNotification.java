@@ -25,6 +25,7 @@ public class BeautifulNotification  {
                 .setContentIntent(pIntent)
                 .setPriority(Notification.PRIORITY_HIGH)
                 .setDefaults(Notification.DEFAULT_ALL)
+                .setAutoCancel(true)
                 .build();
 
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
