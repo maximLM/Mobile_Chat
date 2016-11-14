@@ -62,6 +62,7 @@ public class LocalCore {
     public void sendApproved() {
         ArrayList<Row> rows = db.getApproved();
         Collections.sort(rows);
+
         ((MessagesActivity)activity).reloadList(rows);
     }
 

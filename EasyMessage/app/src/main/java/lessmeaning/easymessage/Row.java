@@ -32,6 +32,7 @@ class Row implements Comparable<Row> {
         return time;
     }
 
+
     public long getConversationID() { return conversationID; }
 
     public String getUserSender() { return userSender; }
