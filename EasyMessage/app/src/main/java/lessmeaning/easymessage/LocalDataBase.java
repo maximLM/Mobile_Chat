@@ -153,12 +153,15 @@ public class LocalDataBase extends SQLiteOpenHelper implements BaseColumns {
         ArrayList<Conversation> alTemp = new ArrayList();
         SQLiteDatabase chatDB = this.getWritableDatabase();
         Cursor c = chatDB.query(TABLE_NAME_CONVERSATION , null, null, null, null, null, null);
+        int i = 0;
         if (c.moveToFirst()){
             do {
                 long conversationID = c.getInt(c.getColumnIndex(CONVERSATION_ID));
                 String friend = c.getString(c.getColumnIndex(USER));
                 long time = c.getInt(c.getColumnIndex(TIME));
                 alTemp.add(new Conversation(conversationID, friend, time));
+                alTemp.get(i).setLastRow(getLastRow(conversationID));
+                i++;
             } while (c.moveToNext());
         }
         c.close();
