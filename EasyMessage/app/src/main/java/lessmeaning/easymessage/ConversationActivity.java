@@ -8,10 +8,15 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 
 /**
@@ -21,10 +26,11 @@ import java.util.ArrayList;
 public class ConversationActivity extends AppCompatActivity implements View.OnClickListener {
 
     private Button mCreate;
-    private ArrayAdapter<String> adapter;
+    private ConversationAdapter adapter;
     private ListView mListView;
-    //private LocalCore localCore = new LocalCore();
+    private LocalCore localCore;
     private AlertDialog.Builder dialog;
+    public static final String CONVERSATION_ID = "CONVERSATION_ID";
 
     @Override
     protected void onCreate(Bundle SavedInstanceState) {
@@ -33,6 +39,19 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
         mCreate = (Button) findViewById(R.id.create_button);
         mListView = (ListView) findViewById(R.id.conversations);
         mCreate.setOnClickListener(this);
+        ArrayList<Conversation> list = new ArrayList<>();
+        for (int i = 0; i < 2; i++) {
+            list.add(new Conversation(i, "Maxim", i * i * i * i));
+        }
+        adapter = new ConversationAdapter(this, list);
+        mListView.setAdapter(adapter);
+        localCore = new LocalCore(this);
+        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                goTo((int)adapter.getItem(position).getConversationID());
+            }
+        });
         dialog = new AlertDialog.Builder(this);
         dialog.setTitle("Error!");
         dialog.setCancelable(true);
@@ -44,7 +63,17 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
         });
     }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        localCore.disconnectService();
+    }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        //localCore.connectService(); toDo
+    }
 
     @Override
     public void onClick(View v) {
@@ -52,14 +81,13 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
             case (R.id.create_button):
                 hideKeayboard();
                 //localCore.createConversation(String username);
-                success();
                 break;
         }
     }
 
     public void reloadList(ArrayList<Conversation> convs) {
-//        adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, rows);
-//        mListView.setAdapter(adapter);
+        adapter = new ConversationAdapter(this, convs);
+        mListView.setAdapter(adapter);
     }
 
     public void fail(String reason) {
@@ -78,5 +106,11 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
             InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
         }
+    }
+
+    public void goTo(int conversationID) {
+        Intent intent = new Intent(this, MessagesActivity.class);
+        intent.putExtra(CONVERSATION_ID, conversationID);
+        startActivity(intent);
     }
 }

@@ -30,7 +30,7 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
     private CheckBox mCheck;
     private ProgressBar loading;
     private SignInActivity self;
-    //LocalCore localCore = new LocalCore(this);
+    private LocalCore localCore = new LocalCore(this);
 
     @Override
     protected void onCreate(Bundle SavedInstanceState) {
@@ -68,6 +68,17 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
         signUp.setOnClickListener(this);
     }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        localCore.disconnectService();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        //localCore.connectService(); toDO
+    }
 
     @Override
     public void onClick(View v) {

@@ -236,7 +236,7 @@ public class LocalDataBase extends SQLiteOpenHelper implements BaseColumns {
 
     }
 
-    public String getLastRow(long conversationID){
+    public Row getLastRow(long conversationID){
         SQLiteDatabase chatDB = this.getWritableDatabase();
         String buf = "" + conversationID;
         String[] conv = {buf};
@@ -246,7 +246,7 @@ public class LocalDataBase extends SQLiteOpenHelper implements BaseColumns {
             lastRow = c.getString(c.getColumnIndex(CONTENT));
         }
 
-        return lastRow;
+        return new Row(0, "friend", lastRow, 123);
     }
 
 
