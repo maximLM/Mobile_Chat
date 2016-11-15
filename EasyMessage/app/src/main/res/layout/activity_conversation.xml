@@ -33,7 +33,12 @@
 
     <ListView
         android:id="@+id/conversations"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:paddingTop="5dp"
         android:layout_below="@+id/find_username"
+        android:dividerHeight="10dp"
+        android:divider="@drawable/divider"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
     </ListView>

@@ -10,11 +10,17 @@ public class Conversation implements Comparable<Conversation> {
     private long conversationID;
     private long time;
 
+    private Row row;
+
     public Conversation(long conversationID, String friend, long time) {
         this.conversationID = conversationID;
         this.friend = friend;
         this.time = time;
     }
+
+    public Row getLastRow() { return row; }
+
+    public void setLastRow(Row lastRow) { this.row = lastRow; }
 
     public long getTime() { return time; }
 
@@ -26,5 +32,9 @@ public class Conversation implements Comparable<Conversation> {
     @Override
     public int compareTo(Conversation conv) {
         return (int) (time - conv.time);
+    }
+
+    public Row getRow() {
+        return row;
     }
 }

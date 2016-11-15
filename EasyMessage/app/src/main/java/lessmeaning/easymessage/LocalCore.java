@@ -78,7 +78,7 @@ public class LocalCore {
         return false;
     }
 
-    private void connectToService() {
+    public void connectToService() {
         try {
             if (brv != null) activity.unregisterReceiver(brv);
         } catch (IllegalArgumentException e) { }

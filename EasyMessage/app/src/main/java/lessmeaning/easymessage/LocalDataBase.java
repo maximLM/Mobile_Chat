@@ -113,6 +113,26 @@ public class LocalDataBase extends SQLiteOpenHelper implements BaseColumns {
         return row;
     }
 
+    public ArrayList<Row> getApproved(long convID) {
+        ArrayList<Row> row = new ArrayList();
+        SQLiteDatabase chatDB = this.getWritableDatabase();
+        String buf = "" + convID;
+        String[] conv = {buf};
+        Cursor c = chatDB.query(TABLE_NAME_APPROVED , null, CONVERSATION_ID + " = ?", conv, null, null, null);
+        if(c.moveToFirst()){
+            do {
+                String content = c.getString(c.getColumnIndex(CONTENT));
+                long time = c.getInt(c.getColumnIndex(TIME));
+                String userSender = c.getString(c.getColumnIndex(USER));
+                long conversationID = c.getInt(c.getColumnIndex(CONVERSATION_ID));
+                Row r = new Row(conversationID, userSender, content, time);
+                row.add(r);
+            } while (c.moveToNext());
+        }
+        c.close();
+        return row;
+    }
+
     public ArrayList<TempRow> getTemp() {
         ArrayList<TempRow> alTemp = new ArrayList();
         SQLiteDatabase chatDB = this.getWritableDatabase();
@@ -133,12 +153,15 @@ public class LocalDataBase extends SQLiteOpenHelper implements BaseColumns {
         ArrayList<Conversation> alTemp = new ArrayList();
         SQLiteDatabase chatDB = this.getWritableDatabase();
         Cursor c = chatDB.query(TABLE_NAME_CONVERSATION , null, null, null, null, null, null);
+        int i = 0;
         if (c.moveToFirst()){
             do {
                 long conversationID = c.getInt(c.getColumnIndex(CONVERSATION_ID));
                 String friend = c.getString(c.getColumnIndex(USER));
                 long time = c.getInt(c.getColumnIndex(TIME));
                 alTemp.add(new Conversation(conversationID, friend, time));
+                alTemp.get(i).setLastRow(getLastRow(conversationID));
+                i++;
             } while (c.moveToNext());
         }
         c.close();
@@ -183,9 +206,9 @@ public class LocalDataBase extends SQLiteOpenHelper implements BaseColumns {
 
     public long getLastTimeMess() {
         SQLiteDatabase chatDB = this.getWritableDatabase();
-        Cursor c = chatDB.query(TABLE_NAME_APPROVED, null, null, null, null, null, null);
+        Cursor c = chatDB.query(TABLE_NAME_APPROVED, new String[] {"MAX(_id)", TIME}, null, null, null, null, null);
         long lastTimeMess = 0;
-        if (c.moveToLast())
+        if (c.moveToFirst())
             lastTimeMess = c.getLong(c.getColumnIndex(TIME));
         c.close();
         return  lastTimeMess;
@@ -193,9 +216,9 @@ public class LocalDataBase extends SQLiteOpenHelper implements BaseColumns {
 
     public long getLastTimeConv() {
         SQLiteDatabase chatDB = this.getWritableDatabase();
-        Cursor c = chatDB.query(TABLE_NAME_CONVERSATION, null, null, null, null, null, null);
+        Cursor c = chatDB.query(TABLE_NAME_CONVERSATION, new String[] {"MAX(_id)", TIME}, null, null, null, null, null);
         long lastTimeConv = 0;
-        if (c.moveToLast())
+        if (c.moveToFirst())
             lastTimeConv = c.getLong(c.getColumnIndex(TIME));
         c.close();
         return  lastTimeConv;
@@ -204,13 +227,26 @@ public class LocalDataBase extends SQLiteOpenHelper implements BaseColumns {
     public String getUsername() {
         String username = "";
         SQLiteDatabase chatDB = this.getWritableDatabase();
-        Cursor c = chatDB.query(TABLE_NAME_CONVERSATION, null, null, null, null, null, null);
+        Cursor c = chatDB.query(TABLE_NAME_CONVERSATION, new String[] {"MIN(_id)", USER}, null, null, null, null, null);
         if (c.moveToFirst())
             username = c.getString(c.getColumnIndex(USER));
         c.close();
 
         return username;
 
+    }
+
+    public Row getLastRow(long conversationID){
+        SQLiteDatabase chatDB = this.getWritableDatabase();
+        String buf = "" + conversationID;
+        String[] conv = {buf};
+        String lastRow = "";
+        Cursor c = chatDB.query(TABLE_NAME_APPROVED , new String[] {"MAX(_id)", CONTENT}, CONVERSATION_ID + " = ?", conv, null, null, null);
+        if(c.moveToFirst()){
+            lastRow = c.getString(c.getColumnIndex(CONTENT));
+        }
+
+        return new Row(0, "friend", lastRow, 123);
     }
 
 
