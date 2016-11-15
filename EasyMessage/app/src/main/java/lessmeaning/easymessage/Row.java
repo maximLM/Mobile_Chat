@@ -6,9 +6,6 @@ package lessmeaning.easymessage;
 class Row implements Comparable<Row> {
     private String content;
     private long time;
-
-
-
     private long conversationID;
     private String userSender;
 

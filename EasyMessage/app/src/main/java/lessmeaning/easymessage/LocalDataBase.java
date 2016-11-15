@@ -159,8 +159,7 @@ public class LocalDataBase extends SQLiteOpenHelper implements BaseColumns {
                 long conversationID = c.getInt(c.getColumnIndex(CONVERSATION_ID));
                 String friend = c.getString(c.getColumnIndex(USER));
                 long time = c.getInt(c.getColumnIndex(TIME));
-                alTemp.add(new Conversation(conversationID, friend, time));
-                alTemp.get(i).setLastRow(getLastRow(conversationID));
+                alTemp.add(new Conversation(conversationID, friend, time, getLastRow(conversationID)));
                 i++;
             } while (c.moveToNext());
         }
@@ -187,7 +186,6 @@ public class LocalDataBase extends SQLiteOpenHelper implements BaseColumns {
     }
 
     public void deleteEverything() {
-        SQLiteDatabase hatDB = this.getWritableDatabase();
         SQLiteDatabase chatDB = this.getWritableDatabase();
         chatDB.delete(TABLE_NAME_TEMP, null, null);
         chatDB.delete(TABLE_NAME_CONVERSATION, null, null);
@@ -236,17 +234,20 @@ public class LocalDataBase extends SQLiteOpenHelper implements BaseColumns {
 
     }
 
-    public String getLastRow(long conversationID){
+    public Row getLastRow(long conversationID){
         SQLiteDatabase chatDB = this.getWritableDatabase();
         String buf = "" + conversationID;
         String[] conv = {buf};
-        String lastRow = "";
-        Cursor c = chatDB.query(TABLE_NAME_APPROVED , new String[] {"MAX(_id)", CONTENT}, CONVERSATION_ID + " = ?", conv, null, null, null);
+        String cont = "", user = "";
+        long time = 0;
+        Cursor c = chatDB.query(TABLE_NAME_APPROVED , new String[] {"MAX(_id)", CONTENT, TIME, USER}, CONVERSATION_ID + " = ?", conv, null, null, null);
         if(c.moveToFirst()){
-            lastRow = c.getString(c.getColumnIndex(CONTENT));
+            cont = c.getString(c.getColumnIndex(CONTENT));
+            user = c.getString(c.getColumnIndex(USER));
+            time = c.getInt(c.getColumnIndex(TIME));
         }
 
-        return lastRow;
+        return new Row (conversationID, user, cont, time);
     }
 
 
