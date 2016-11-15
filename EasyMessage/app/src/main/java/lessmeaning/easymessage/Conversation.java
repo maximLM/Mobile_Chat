@@ -11,7 +11,7 @@ public class Conversation implements Comparable<Conversation> {
     private long time;
     private String lastRow;
 
-    public Conversation(long conversationID, String friend, long time, String lastRow) {
+    public Conversation(long conversationID, String friend, long time) {
         this.conversationID = conversationID;
         this.friend = friend;
         this.time = time;
