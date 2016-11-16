@@ -74,9 +74,10 @@ public class ServerConnection {
     public static ArrayList<Row> getMessages(String username, long time) {
         String lnk = null;
         try {
+            String utf = "UTF-8";
             lnk = "http://e-chat.h1n.ru/getmessages.php?username=" +
-                    URLEncoder.encode(username, "UTF-8")
-                    +"&time=" + URLEncoder.encode(String.valueOf(time), "UTF-8");
+                    URLEncoder.encode(username, utf)
+                    +"&time=" + URLEncoder.encode(String.valueOf(time), utf);
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
@@ -97,9 +98,10 @@ public class ServerConnection {
     public static ArrayList<Conversation> getConversations(String username, long time) {
         String lnk = null;
         try {
+            String utf = "UTF-8";
             lnk = "http://e-chat.h1n.ru/getconversations.php?username=" +
-                    URLEncoder.encode(username, "UTF-8")
-                    + "&time=" + URLEncoder.encode(String.valueOf(time), "UTF-8");
+                    URLEncoder.encode(username, utf)
+                    + "&time=" + URLEncoder.encode(String.valueOf(time), utf);
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }

@@ -74,10 +74,11 @@ public class Merger extends Service implements Runnable {
     }
 
     private String generateLink(long convID, String msg) throws UnsupportedEncodingException {
-        return SERVER_NAME + "/send.php?user=" +
-                URLEncoder.encode(localdb.getUsername(), "UTF-8") + "&conversationID=" +
-                URLEncoder.encode(String.valueOf(convID))
-                + "&message=" + URLEncoder.encode(msg.trim(), "UTF-8");
+        String utf = "UTF-8";
+        return SERVER_NAME + "/send.php?username=" +
+                URLEncoder.encode(localdb.getUsername(), utf) + "&conversationID=" +
+                URLEncoder.encode(String.valueOf(convID), utf)
+                + "&content=" + URLEncoder.encode(msg.trim(), utf);
     }
 
     private boolean sendToServer(long convID, String msg) {

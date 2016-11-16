@@ -42,6 +42,10 @@ public class LocalCore {
                 }
             }
         };
+        if (clazz == MessagesActivity.class)
+            sendApproved();
+        else if (clazz == ConversationActivity.class)
+            sendConversations();
         connectToService();
     }
 
@@ -100,6 +104,11 @@ public class LocalCore {
         } catch (IllegalArgumentException e) { }
     }
 
+    public void logOut() {
+        db.deleteEverything();
+        activity.startActivity(new Intent(activity, SignInActivity.class));
+    }
+
     public void signin(final String username,final String password) {
         if (clazz != SignInActivity.class) return;
         if (db.getUsername() != null)
@@ -128,7 +137,38 @@ public class LocalCore {
                     signedIn(null, fail);
                 }
             }
-        });
+        }).start();
+    }
+
+    public void createConversation(final String username) {
+        if (clazz != ConversationActivity.class) return;
+        if (db.getUsername() != null)
+            ((ConversationActivity)activity).fail("You are already logged");
+        if (!ServerConnection.checkConnection(activity))
+            ((ConversationActivity)activity).fail("No Connection");
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                String utf = "UTF-8";
+                String lnk = null;
+                try {
+                    lnk = "http://e-chat.h1n.ru/createconversation.php?user1="
+                            + URLEncoder.encode(db.getUsername(), utf)
+                            + "&user2="
+                            + URLEncoder.encode(username, utf);
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                    return;
+                }
+                String success = ServerConnection.executeQuery(lnk);
+                String fail = "This user doesnot exist";
+                if (!success.contains("fail")) {
+                    signedIn(username, fail);
+                } else {
+                    signedIn(null, fail);
+                }
+            }
+        }).start();
     }
 
     private void signedIn(String username, final String fail) {
@@ -192,7 +232,7 @@ public class LocalCore {
                     signedIn(null, fail);
                 }
             }
-        });
+        }).start();
     }
 
 }
