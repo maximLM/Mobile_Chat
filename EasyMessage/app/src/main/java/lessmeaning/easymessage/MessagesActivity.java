@@ -82,7 +82,7 @@ public class MessagesActivity extends AppCompatActivity implements View.OnClickL
     @Override
     protected void onResume() {
         super.onResume();
-        //localCore.connectService(); ToDO
+        localCore.connectService();
     }
 
     @Override
