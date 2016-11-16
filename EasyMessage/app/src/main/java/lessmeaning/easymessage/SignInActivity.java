@@ -30,12 +30,13 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
     private CheckBox mCheck;
     private ProgressBar loading;
     private SignInActivity self;
-    private LocalCore localCore = new LocalCore(this);
+    private LocalCore localCore;
 
     @Override
     protected void onCreate(Bundle SavedInstanceState) {
         super.onCreate(SavedInstanceState);
         self = this;
+        localCore = new LocalCore(this);
         setContentView(R.layout.activity_signin);
         dialog = new AlertDialog.Builder(this);
         dialog.setTitle("Authorization error");
@@ -77,7 +78,7 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
     @Override
     protected void onResume() {
         super.onResume();
-        //localCore.connectService(); toDO
+        localCore.connectToService();
     }
 
     @Override
@@ -90,7 +91,7 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
                 }
                 else {
                     loading.setVisibility(View.VISIBLE);
-                    //localCore.signin(userName.getText().toString(), password.getText().toString());
+                    localCore.signin(userName.getText().toString(), password.getText().toString());
                     success();
                     userName.setText("");
                     password.setText("");
@@ -103,7 +104,7 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
                 }
                 else {
                     loading.setVisibility(View.VISIBLE);
-                    //localCore.signup(userName.getText().toString(), password.getText().toString());
+                    localCore.signup(userName.getText().toString(), password.getText().toString());
                     userName.setText("");
                     password.setText("");
                 }

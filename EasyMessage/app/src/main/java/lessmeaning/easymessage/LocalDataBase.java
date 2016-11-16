@@ -16,6 +16,7 @@ import java.util.ArrayList;
  */
 
 public class LocalDataBase extends SQLiteOpenHelper implements BaseColumns {
+    private static final String TAG = "supertesting";
     String myLog = "test db";
 
     public static final String TABLE_NAME_APPROVED = "ApprovedTable";
@@ -142,6 +143,7 @@ public class LocalDataBase extends SQLiteOpenHelper implements BaseColumns {
                 long id = c.getInt(c.getColumnIndex(KEY_ID));
                 long conversationID = c.getInt(c.getColumnIndex(CONVERSATION_ID));
                 String content = c.getString(c.getColumnIndex(CONTENT));
+                Log.d(TAG, "getTemp: co " + content);
                 alTemp.add(new TempRow(conversationID, content, id));
             } while (c.moveToNext());
         }
@@ -246,7 +248,7 @@ public class LocalDataBase extends SQLiteOpenHelper implements BaseColumns {
             lastRow = c.getString(c.getColumnIndex(CONTENT));
         }
 
-        return new Row(0, "friend", lastRow, 123);
+        return new Row(0, "friend", "fff", 123);
     }
 
 

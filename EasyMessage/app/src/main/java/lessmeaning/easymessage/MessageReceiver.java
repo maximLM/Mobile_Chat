@@ -15,7 +15,7 @@ public class MessageReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        BeautifulNotification.showMessageNotification(context, intent.getStringExtra(MESSAGE), "friend");
+        BeautifulNotification.showMessageNotification(context, intent.getStringExtra(MESSAGE), "friend", 11);
     }
 }
 

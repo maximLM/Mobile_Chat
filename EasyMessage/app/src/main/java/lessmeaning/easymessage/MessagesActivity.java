@@ -64,7 +64,9 @@ public class MessagesActivity extends AppCompatActivity implements View.OnClickL
         ask(Manifest.permission.READ_PHONE_STATE);
         Log.d("supertesting", "onCreate: debug available");
         setContentView(R.layout.activity_messages);
-        localCore = new LocalCore(this, getIntent().getIntExtra(ConversationActivity.CONVERSATION_ID, 0));
+        int id = getIntent().getIntExtra(ConversationActivity.CONVERSATION_ID, 0);
+        Log.d("supertesting", "onCreate: id is " + id);
+        localCore = new LocalCore(this, id);
         mButton = (Button) findViewById(R.id.button);
         mEditText = (EditText) findViewById(R.id.editText);
         mListView = (ListView) findViewById(R.id.list_view);
@@ -82,7 +84,7 @@ public class MessagesActivity extends AppCompatActivity implements View.OnClickL
     @Override
     protected void onResume() {
         super.onResume();
-        //localCore.connectService(); ToDO
+        localCore.connectToService();
     }
 
     @Override
@@ -102,7 +104,6 @@ public class MessagesActivity extends AppCompatActivity implements View.OnClickL
             if (!mEditText.getText().toString().equals("")) {
                 localCore.addTemp(mEditText.getText().toString());
                 mEditText.setText("");
-
             }
         } else if (v.getId() == mEditText.getId()) {
             scrollBottom(mListView);

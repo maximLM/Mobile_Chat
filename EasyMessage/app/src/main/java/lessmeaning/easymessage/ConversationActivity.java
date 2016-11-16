@@ -72,7 +72,7 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
     @Override
     protected void onResume() {
         super.onResume();
-        //localCore.connectService(); toDo
+        localCore.connectToService();
     }
 
     @Override
@@ -80,7 +80,7 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
         switch (v.getId()) {
             case (R.id.create_button):
                 hideKeayboard();
-                //localCore.createConversation(String username);
+                localCore.createConversation("Pedaras");
                 break;
         }
     }

@@ -18,9 +18,9 @@ public class Conversation implements Comparable<Conversation> {
         this.time = time;
     }
 
-    public Row getLastRow() { return row; }
-
-    public void setLastRow(Row lastRow) { this.row = lastRow; }
+    public void setLastRow(Row lastRow) {
+        this.row = new Row(1,"1","2",1);
+    }
 
     public long getTime() { return time; }
 

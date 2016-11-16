@@ -23,6 +23,7 @@ public class LocalCore {
     private BroadcastReceiver brv;
     private Activity activity;
     private Class clazz;
+    public static final String TAG = "supertesting";
     private final int convID;
     public static final String BROADCAST = "LESSMEANING.CHATMOBILE.HEY";
     public static final String IS_CONVERSATION = "ITISCONVERSATION";
@@ -51,6 +52,7 @@ public class LocalCore {
     }
 
     public void addTemp(String inf) {
+        Log.d(TAG, "addTemp: inf is " + inf);
         db.addTemp(new TempRow(convID, inf, -124));
     }
 
@@ -103,33 +105,7 @@ public class LocalCore {
 
     public void signin(final String username,final String password) {
         if (clazz != SignInActivity.class) return;
-        if (db.getUsername() != null)
-            ((SignInActivity)activity).fail("You are already logged");
-        if (!ServerConnection.checkConnection(activity))
-            ((SignInActivity)activity).fail("No Connection");
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                String utf = "UTF-8";
-                String lnk = null;
-                try {
-                    lnk = "http://e-chat.h1n.ru/signin.php?username="
-                            + URLEncoder.encode(username, utf)
-                            + "&password="
-                            + URLEncoder.encode(password, utf);
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
-                    return;
-                }
-                String success = ServerConnection.executeQuery(lnk);
-                String fail = "Password incorrect or user does not exists";
-                if (success.contains("success")) {
-                    signedIn(username, fail);
-                } else {
-                    signedIn(null, fail);
-                }
-            }
-        });
+        signedIn(username, "fail");
     }
 
     private void signedIn(String username, final String fail) {
@@ -179,5 +155,12 @@ public class LocalCore {
 
     public void signup(final String username, final String password) {
         signedIn(username, "Sign UP failed");
+    }
+
+    public void createConversation(String username) {
+        ArrayList<Conversation> res = new ArrayList<Conversation>();
+        res.add(new Conversation(1, username, new Date().getTime()));
+        db.addConversations(res);
+        if (clazz == ConversationActivity.class) sendConversations();
     }
 }

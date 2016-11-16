@@ -21,6 +21,7 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 
 public class Merger extends Service implements Runnable {
 
@@ -35,6 +36,7 @@ public class Merger extends Service implements Runnable {
         localdb = new LocalDataBase(this);
         new Thread(this).start();
         running = true;
+        Log.d(TAG, "MERGER of merger");
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -42,13 +44,13 @@ public class Merger extends Service implements Runnable {
                     checkLocal();
                 }
             }
-        });
+        }).start();
     }
 
     @Override
     public void run() {
         while (running) {
-            checkServer();
+//            checkServer();
 
             try {
                 Thread.sleep(1000);
@@ -130,16 +132,25 @@ public class Merger extends Service implements Runnable {
 
     private void checkLocal() {
         ArrayList<TempRow> freshRows = localdb.getTemp();
+        ArrayList<Row> rows = new ArrayList<>();
         int len = freshRows.size();
+//        Log.d(TAG, "checkLocal: ");
         if (len == 0) return;
+        Log.d(TAG, "checkLocal: found smth");
         boolean success = true;
         for (int i = 0; i < len && success; i++) {
-            success = sendToServer(freshRows.get(i).getConversationID(),
-                    freshRows.get(i).getContent());
-            if (success) {
+            if (true) {
                 localdb.deleteTemp((int) freshRows.get(i).getId());
             }
+
+            rows.add(new Row(freshRows.get(i).getConversationID(),
+                    localdb.getUsername(),
+                    freshRows.get(i).getContent(),
+                    new Date().getTime()));
         }
+        Log.d(TAG, "checkLocal: msg is " + rows.get(0).getContent());
+        localdb.addApproved(rows);
+        sendMsgToUpd(rows.get(rows.size() - 1).getContent(), false);
     }
 
     private void sendMsgToUpd(String msg, boolean isConv) {
@@ -148,6 +159,7 @@ public class Merger extends Service implements Runnable {
         sendBroadcast(intent);
         intent = new Intent(this, MessageReceiver.class);
         intent.putExtra(MessageReceiver.MESSAGE, msg);
+        Log.d(TAG, "sendMsgToUpd: intent is " + intent);
         sendBroadcast(intent);
     }
 
