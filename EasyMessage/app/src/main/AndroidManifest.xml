@@ -21,16 +21,16 @@
 
         <activity
             android:name=".SignInActivity"
-            android:windowSoftInputMode="stateAlwaysHidden">
+            android:windowSoftInputMode="adjustPan|stateAlwaysHidden">
+        </activity>
+
+        <activity android:name=".ConversationActivity"
+            android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
-
-        <activity android:name=".ConversationActivity"
-            android:windowSoftInputMode="stateAlwaysHidden">
         </activity>
         <service
             android:name=".Merger"

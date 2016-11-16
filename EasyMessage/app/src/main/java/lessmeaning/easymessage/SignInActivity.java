@@ -29,13 +29,11 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
     private AlertDialog.Builder dialog;
     private CheckBox mCheck;
     private ProgressBar loading;
-    private SignInActivity self;
-    private LocalCore localCore = new LocalCore(this);
+    private LocalCore localCore;
 
     @Override
     protected void onCreate(Bundle SavedInstanceState) {
         super.onCreate(SavedInstanceState);
-        self = this;
         setContentView(R.layout.activity_signin);
         dialog = new AlertDialog.Builder(this);
         dialog.setTitle("Authorization error");
@@ -51,6 +49,7 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
         mCheck = (CheckBox) findViewById(R.id.checkBox);
         loading = (ProgressBar) findViewById(R.id.loading);
         signIn = (Button) findViewById(R.id.signin);
+        localCore = new LocalCore(this);
         signUp = (Button) findViewById(R.id.signup);
         mCheck.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -77,7 +76,7 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
     @Override
     protected void onResume() {
         super.onResume();
-        //localCore.connectService(); toDO
+        localCore.connectToService();
     }
 
     @Override
@@ -90,10 +89,9 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
                 }
                 else {
                     loading.setVisibility(View.VISIBLE);
-                    //localCore.signin(userName.getText().toString(), password.getText().toString());
+                    localCore.signin(userName.getText().toString(), password.getText().toString());
                     success();
-                    userName.setText("");
-                    password.setText("");
+                    finish();
                 }
                 break;
             case (R.id.signup):
@@ -103,9 +101,9 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
                 }
                 else {
                     loading.setVisibility(View.VISIBLE);
-                    //localCore.signup(userName.getText().toString(), password.getText().toString());
-                    userName.setText("");
-                    password.setText("");
+                    localCore.signup(userName.getText().toString(), password.getText().toString());
+                    success();
+                    finish();
                 }
                 break;
         }

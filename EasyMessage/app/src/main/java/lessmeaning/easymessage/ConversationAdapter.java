@@ -52,7 +52,9 @@ public class ConversationAdapter extends BaseAdapter {
         }
         Conversation conversation = getItem(position);
         ((TextView) view.findViewById(R.id.conv)).setText(conversation.getFriend());
-        ((TextView) view.findViewById(R.id.message)).setText(conversation.getRow().getContent());
+        if (conversation.getRow() != null) {
+            ((TextView) view.findViewById(R.id.message)).setText(conversation.getRow().getContent());
+        }
         return view;
     }
 

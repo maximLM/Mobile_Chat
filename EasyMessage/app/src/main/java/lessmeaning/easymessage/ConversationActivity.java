@@ -11,6 +11,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -28,9 +29,11 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
     private Button mCreate;
     private ConversationAdapter adapter;
     private ListView mListView;
+    private EditText userName;
     private LocalCore localCore;
     private AlertDialog.Builder dialog;
     public static final String CONVERSATION_ID = "CONVERSATION_ID";
+
 
     @Override
     protected void onCreate(Bundle SavedInstanceState) {
@@ -38,14 +41,12 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
         setContentView(R.layout.activity_conversation);
         mCreate = (Button) findViewById(R.id.create_button);
         mListView = (ListView) findViewById(R.id.conversations);
+        userName = (EditText) findViewById(R.id.username);
         mCreate.setOnClickListener(this);
-        ArrayList<Conversation> list = new ArrayList<>();
-        for (int i = 0; i < 2; i++) {
-            list.add(new Conversation(i, "Maxim", i * i * i * i));
-        }
-        adapter = new ConversationAdapter(this, list);
-        mListView.setAdapter(adapter);
         localCore = new LocalCore(this);
+        if (!localCore.checkAuthorization()) {
+            inSignedIn();
+        }
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -72,7 +73,7 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
     @Override
     protected void onResume() {
         super.onResume();
-        //localCore.connectService(); toDo
+        localCore.connectToService();
     }
 
     @Override
@@ -80,7 +81,7 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
         switch (v.getId()) {
             case (R.id.create_button):
                 hideKeayboard();
-                //localCore.createConversation(String username);
+                localCore.createConversation(userName.getText().toString());
                 break;
         }
     }
@@ -111,6 +112,11 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
     public void goTo(int conversationID) {
         Intent intent = new Intent(this, MessagesActivity.class);
         intent.putExtra(CONVERSATION_ID, conversationID);
+        startActivity(intent);
+    }
+
+    public void inSignedIn() {
+        Intent intent = new Intent(this, SignInActivity.class);
         startActivity(intent);
     }
 }
