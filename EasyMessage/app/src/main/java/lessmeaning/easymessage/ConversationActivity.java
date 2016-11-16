@@ -34,6 +34,7 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
     private AlertDialog.Builder dialog;
     public static final String CONVERSATION_ID = "CONVERSATION_ID";
 
+
     @Override
     protected void onCreate(Bundle SavedInstanceState) {
         super.onCreate(SavedInstanceState);
@@ -42,13 +43,10 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
         mListView = (ListView) findViewById(R.id.conversations);
         userName = (EditText) findViewById(R.id.username);
         mCreate.setOnClickListener(this);
-        ArrayList<Conversation> list = new ArrayList<>();
-        for (int i = 0; i < 2; i++) {
-            list.add(new Conversation(i, "Maxim", i * i * i * i));
-        }
-        adapter = new ConversationAdapter(this, list);
-        mListView.setAdapter(adapter);
         localCore = new LocalCore(this);
+        if (!localCore.checkAuthorization()) {
+            inSignedIn();
+        }
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -75,7 +73,7 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
     @Override
     protected void onResume() {
         super.onResume();
-        localCore.connectService();
+        localCore.connectToService();
     }
 
     @Override
@@ -114,6 +112,11 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
     public void goTo(int conversationID) {
         Intent intent = new Intent(this, MessagesActivity.class);
         intent.putExtra(CONVERSATION_ID, conversationID);
+        startActivity(intent);
+    }
+
+    public void inSignedIn() {
+        Intent intent = new Intent(this, SignInActivity.class);
         startActivity(intent);
     }
 }
