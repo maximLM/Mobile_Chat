@@ -1,22 +1,16 @@
 package lessmeaning.easymessage;
 
-import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.IBinder;
-import android.support.v4.content.ContextCompat;
 import android.util.Log;
-import android.util.Pair;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.io.BufferedReader;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
@@ -30,12 +24,10 @@ import java.util.Collections;
 
 public class Merger extends Service implements Runnable {
 
-    private static final String TAG = "supertesting";
+    //    private static final String TAG = "newITIS";
     private volatile boolean running;
-    private LocalDataBase localdb;
+    private volatile LocalDataBase localdb;
     private final String SERVER_NAME = "http://e-chat.h1n.ru";
-    private final String API_NAME = "chat.php";
-    private int counter = 0;
 
     @Override
     public void onCreate() {
@@ -43,6 +35,123 @@ public class Merger extends Service implements Runnable {
         localdb = new LocalDataBase(this);
         new Thread(this).start();
         running = true;
+    }
+
+    @Override
+    public void run() {
+        while (running) {
+            try {
+                checkLocal();
+                checkServer();
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void checkServer() {
+        String username = localdb.getUsername();
+        if (username == null || username.equals("")) return;
+        ArrayList<Conversation> convs = ServerConnection.getConversations(localdb.getUsername(),
+                localdb.getLastTimeConv());
+        if (convs != null && convs.size() > 0) {
+            localdb.addConversations(convs);
+            sendMsgToUpd("New Conversation with " + convs.get(convs.size() - 1).getFriend(), "", 0, true);
+        }
+        ArrayList<Row> rows = ServerConnection.getMessages(localdb.getUsername(),
+                localdb.getLastTimeMess());
+        if (rows != null && rows.size() > 0) {
+            localdb.addApproved(rows);
+            Row row = rows.get(rows.size() - 1);
+            sendMsgToUpd(row.getContent(), row.getUserSender(), (int) row.getConversationID(), false);
+        }
+    }
+
+    private String generateLink(long convID, String msg) throws UnsupportedEncodingException {
+        String utf = "UTF-8";
+        return SERVER_NAME + "/send.php?username=" +
+                URLEncoder.encode(localdb.getUsername(), utf) + "&conversationID=" +
+                URLEncoder.encode(String.valueOf(convID), utf)
+                + "&content=" + URLEncoder.encode(msg.trim(), utf);
+    }
+
+    private boolean sendToServer(long convID, String msg) {
+        String lnk = null;
+        try {
+            lnk = generateLink(convID, msg);
+        } catch (UnsupportedEncodingException e) {
+            try {
+                lnk = generateLink(-999, "UNSUPPORTED_ENCODING_PAY_ATTENTION_USER_IS_"
+                        + localdb.getUsername());
+            } catch (UnsupportedEncodingException e1) {
+                throw new RuntimeException("UNREAL SITUATION");
+            }
+        }
+        boolean success = false;
+        HttpURLConnection conn = null;
+        BufferedReader in = null;
+        try {
+            conn = (HttpURLConnection) new URL(lnk).openConnection();
+            conn.setReadTimeout(15000);
+            conn.setConnectTimeout(15000);
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("User-Agent", "Mozilla/5.0");
+            conn.connect();
+            success = HttpURLConnection.HTTP_OK == conn.getResponseCode();
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+//            Log.d(TAG, "sendToServer: malformed");
+        } catch (IOException e) {
+            e.printStackTrace();
+//            Log.d(TAG, "sendToServer: ioex");
+        } finally {
+            if (conn != null) {
+                conn.disconnect();
+            }
+            if (in != null) {
+                try {
+                    in.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return success;
+    }
+
+
+
+    private void checkLocal() {
+        ArrayList<TempRow> freshRows = localdb.getTemp();
+        int len = freshRows.size();
+        if (len == 0) return;
+        boolean success = true;
+        for (int i = 0; i < len && success; i++) {
+            success = sendToServer(freshRows.get(i).getConversationID(),
+                    freshRows.get(i).getContent());
+            if (success) {
+                localdb.deleteTemp((int) freshRows.get(i).getId());
+            }
+        }
+    }
+
+    private void sendMsgToUpd(String msg,String sender, int conversationId, boolean isConv) {
+        String user = localdb.getUsername();
+        if (user == null) return;
+        Intent intent = new Intent(LocalCore.BROADCAST);
+        intent.putExtra(LocalCore.IS_CONVERSATION, isConv);
+        sendBroadcast(intent);
+        if (sender != null && sender.equals(user)) return;
+        intent = new Intent(this, MessageReceiver.class);
+        intent.putExtra(MessageReceiver.MESSAGE, msg);
+        intent.putExtra(MessageReceiver.CONVERSATION_ID, conversationId);
+        intent.putExtra(MessageReceiver.SENDER_NAME, sender);
+        sendBroadcast(intent);
     }
 
     @Override
@@ -57,7 +166,6 @@ public class Merger extends Service implements Runnable {
 
     @Override
     public void onTaskRemoved(Intent rootIntent) {
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             running = false;
             Intent restartIntent = new Intent(this, getClass());
@@ -68,199 +176,6 @@ public class Merger extends Service implements Runnable {
 
             am.setExact(AlarmManager.RTC, System.currentTimeMillis() + 3000, pi);
         }
-    }
-
-    @Override
-    public void run() {
-        Log.d(TAG, "run: inLoooop");
-        while (running) {
-            checkLocal();
-            String msg = checkServer();
-            if (msg != null) {
-                sendMsgToUpd(msg);
-            }
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    private String checkServer() {
-        long time = localdb.getLastTime();
-        String lnk = null;
-        try {
-            lnk = "http://e-chat.h1n.ru/chat.php?action=get&time=" + URLEncoder.encode(String.valueOf(time), "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        BufferedReader in = null;
-        HttpURLConnection conn = null;
-        String rawInput = null;
-        try {
-            conn = (HttpURLConnection) new URL(lnk).openConnection();
-            counter++;
-//            conn.setReadTimeout(20000);// try to encrease this than test on vlads
-//            conn.setConnectTimeout(15000); encre
-            conn.setRequestMethod("POST");
-            conn.setRequestProperty("USER-AGENT", "Mozilla/5.0");
-            conn.setRequestProperty("ACCEPT-LANGUAGE", "en-US,en;0.5");
-            conn.setDoOutput(true);
-
-            int respondseCode = conn.getResponseCode();
-            in = new BufferedReader(
-                    new InputStreamReader(conn.getInputStream()));
-            StringBuilder buffer = new StringBuilder();
-            int i = 0;
-            String line = "";
-            while ((line = in.readLine()) != null) {
-                i++;
-                buffer.append(line);
-            }
-            rawInput = buffer.toString();
-            Log.d(TAG, "checkServer: resposeCode = " + respondseCode);
-            Log.d(TAG, "checkServer: i = " + i);
-        } catch (ProtocolException e) {
-            e.printStackTrace();
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if (in != null) {
-                try {
-                    in.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            if (conn != null) {
-                counter--;
-                conn.disconnect();
-            }
-        }
-
-//        Log.d(TAG, "checkServer: rawinput = " + rawInput);
-        if (rawInput == null || rawInput.equals("")) return null;
-
-        try {
-            ArrayList<Row> rows = convertToNormal(rawInput);
-
-            if (rows == null || rows.size() == 0)
-                return null;
-            localdb.addApproved(rows);
-            return rows.get(0).getContent();
-        } catch (JSONException e) {
-            e.printStackTrace();
-            System.err.println("JSON not correct it is : \n" + rawInput);
-        }
-        return null;
-    }
-
-    private String generateLink(long time) throws UnsupportedEncodingException {
-        return SERVER_NAME +"/chat.php?action=get&time=" + URLEncoder.encode(String.valueOf(time), "UTF-8");
-    }
-
-    private String generateLink(String msg) throws UnsupportedEncodingException {
-        return SERVER_NAME + "/chat.php?action=send&message=" + URLEncoder.encode(msg.trim(), "UTF-8");
-    }
-
-    private ArrayList<Row> convertToNormal(String rawInput) throws JSONException {
-        ArrayList<Row> res = new ArrayList<>();
-        JSONArray array = new JSONArray(rawInput);
-        JSONObject row;
-        int len = array.length();
-        for (int i = 0; i < len; i++) {
-            row = array.getJSONObject(i);
-            res.add(new Row(row.getString(Fields.MESSAGE + ""),
-                    row.getLong(Fields.TIME + "")));
-            Log.d(TAG, "convertToNormal: row is " + res.get(res.size() - 1).getContent());
-        }
-        Collections.sort(res);
-        return res;
-    }
-
-
-    private boolean sendToServer(String msg) {
-        String lnk = null;
-        try {
-            lnk = generateLink(msg);
-        } catch (UnsupportedEncodingException e) {
-            try {
-                lnk = generateLink("unsupportedencodingwashere");
-            } catch (UnsupportedEncodingException e1) {
-                throw new RuntimeException("UNREAL SITUATION");
-            }
-        }
-        boolean success = false;
-        HttpURLConnection conn = null;
-        BufferedReader in = null;
-        try {
-            conn = (HttpURLConnection) new URL(lnk).openConnection();
-            counter++;
-            conn.setReadTimeout(15000);
-            conn.setConnectTimeout(15000);
-            conn.setRequestMethod("POST");
-            conn.setRequestProperty("User-Agent", "Mozilla/5.0");
-            conn.connect();
-            success = HttpURLConnection.HTTP_OK == conn.getResponseCode();
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-            Log.d(TAG, "sendToServer: malformed");
-        } catch (IOException e) {
-            e.printStackTrace();
-            Log.d(TAG, "sendToServer: ioex");
-        } finally {
-            if (conn != null) {
-                counter--;
-                conn.disconnect();
-            }
-            if (in != null) {
-                try {
-                    in.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-        Log.d(TAG, "sendToServer: success = " + success);
-        Log.d(TAG, "sendToServer: lnk = " + lnk);
-        return success;
-    }
-
-
-
-    private void checkLocal() {
-        ArrayList<Pair<String, Integer>> freshRows = localdb.getTemp();
-        int len = freshRows.size();
-        if (len == 0) return;
-        boolean success = true;
-        for (int i = 0; i < len && success; i++) {
-            success = sendToServer(freshRows.get(i).first);
-            if (success) {
-                localdb.deleteTempRow(freshRows.get(i).second);
-            }
-        }
-    }
-
-    private void sendMsgToUpd(String msg) {
-        sendBroadcast(new Intent(LocalCore.BROADCAST));
-        Intent intent = new Intent(this, MessageReceiver.class);
-        intent.putExtra(MessageReceiver.MESSAGE, msg);
-        sendBroadcast(intent);
-
-    }
-
-    private boolean checkIsActivityAlive(Class<?> serviceClass, Context context) {
-        ActivityManager manager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
-        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-            if (serviceClass.getName().equals(service.service.getClassName())) {
-                return true;
-            }
-        }
-        return false;
     }
 
 }

@@ -14,15 +14,24 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".MainActivity"
-            android:windowSoftInputMode="stateUnchanged|adjustResize">
+            android:name=".MessagesActivity"
+            android:windowSoftInputMode="stateAlwaysHidden|adjustResize">
+
+        </activity>
+
+        <activity
+            android:name=".SignInActivity"
+            android:windowSoftInputMode="adjustPan|stateAlwaysHidden">
+        </activity>
+
+        <activity android:name=".ConversationActivity"
+            android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <service
             android:name=".Merger"
             android:enabled="true"

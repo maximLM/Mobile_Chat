@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#1abc9c">
+
+    <EditText
+        android:id="@+id/username"
+        android:singleLine="true"
+        android:paddingRight="5dp"
+        android:paddingLeft="5dp"
+        android:gravity="center"
+        android:background="@drawable/field_ic"
+        android:hint="Username"
+        android:layout_marginLeft="15dp"
+        android:layout_width="200dp"
+        android:layout_alignParentLeft="true"
+        android:layout_height="50dp"
+        android:layout_marginTop="54dp"
+        android:layout_centerHorizontal="true"/>
+
+    <EditText
+        android:id="@+id/password"
+        android:singleLine="true"
+        android:hint="Password"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp"
+        android:inputType="textPassword"
+        android:gravity="center"
+        android:background="@drawable/field_ic"
+        android:layout_width="200dp"
+        android:layout_height="50dp"
+        android:layout_alignLeft="@+id/username"
+        android:layout_below="@+id/username"
+        android:layout_marginTop="15dp"/>
+
+    <Button
+        android:id="@+id/signup"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Sign up"
+        android:layout_below="@+id/password"
+        android:layout_marginTop="15dp"
+        android:layout_alignLeft="@id/password"
+        android:background="@drawable/button_ic"/>
+    <Button
+        android:id="@+id/signin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Sign In"
+        android:layout_below="@+id/password"
+        android:layout_marginTop="15dp"
+        android:layout_alignRight="@+id/password"
+        android:background="@drawable/button_ic"/>
+    <TextView
+        android:id="@+id/welcome"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="WELCOME"
+        android:layout_alignParentRight="true"
+        android:textSize="50dp"
+        android:textColor="#e74c3c"
+        android:layout_marginTop="40dp"
+        android:layout_marginRight="50dp" />
+
+    <ImageView
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:src="@drawable/welcome_icon"
+        android:id="@+id/imageView"
+        android:layout_below="@+id/welcome"
+        android:layout_alignLeft="@+id/welcome" />
+
+    <CheckBox
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/signup"
+        android:layout_marginTop="10dp"
+        android:layout_alignLeft="@+id/signup"
+        android:text="Show password"
+        android:textSize="18dp"
+        android:id="@+id/checkBox"/>
+
+    <ProgressBar
+        android:layout_width="wrap_content"
+        android:visibility="invisible"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/signin"
+        android:layout_toRightOf="@+id/signin"
+        android:layout_marginLeft="10dp"
+        android:layout_toEndOf="@+id/signin"
+        android:id="@+id/loading" />
+</RelativeLayout>

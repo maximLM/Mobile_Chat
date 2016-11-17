@@ -2,7 +2,9 @@ package lessmeaning.easymessage;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
-import android.os.Build;
+import android.content.res.Configuration;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -14,14 +16,17 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Toast;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+import java.util.ArrayList;
 
-    Button mButton;
-    ListView mListView;
-    LocalCore localCore;
-    EditText mEditText;
+public class MessagesActivity extends AppCompatActivity implements View.OnClickListener {
 
+    private Button mButton;
+    private ListView mListView;
+    private LocalCore localCore;
+    private EditText mEditText;
+    private MessageAdapter adapter;
 
    void ask(final String permission) {
        if (ContextCompat.checkSelfPermission(this, permission
@@ -58,13 +63,38 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         ask(Manifest.permission.CALL_PHONE);
         ask(Manifest.permission.READ_PHONE_STATE);
         Log.d("supertesting", "onCreate: debug available");
-        setContentView(R.layout.activity_main);
-        localCore = new LocalCore(this);
+        setContentView(R.layout.activity_messages);
         mButton = (Button) findViewById(R.id.button);
         mEditText = (EditText) findViewById(R.id.editText);
         mListView = (ListView) findViewById(R.id.list_view);
         mButton.setOnClickListener(this);
+        localCore = new LocalCore(this, getIntent().getIntExtra(ConversationActivity.CONVERSATION_ID, 0));
         localCore.sendApproved();
+        mEditText.setOnClickListener(this);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        localCore.disconnectService();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        localCore.connectToService();
+        localCore.sendApproved();
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        // Checks whether a hardware keyboard is available
+        if (newConfig.hardKeyboardHidden == Configuration.HARDKEYBOARDHIDDEN_NO) {
+            Toast.makeText(this, "keyboard visible", Toast.LENGTH_SHORT).show();
+        } else if (newConfig.hardKeyboardHidden == Configuration.HARDKEYBOARDHIDDEN_YES) {
+            Toast.makeText(this, "keyboard hidden", Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override
@@ -73,13 +103,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             if (!mEditText.getText().toString().equals("")) {
                 localCore.addTemp(mEditText.getText().toString());
                 mEditText.setText("");
+
             }
+        } else if (v.getId() == mEditText.getId()) {
+            scrollBottom(mListView);
         }
     }
 
-    public void reloadList(String row[]) {
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
-                android.R.layout.simple_list_item_1, row);
+    public void reloadList(ArrayList<Row> rows) {
+        adapter = new MessageAdapter(this, rows);
         mListView.setAdapter(adapter);
+        scrollBottom(mListView);
+    }
+    public void scrollBottom(final ListView listView) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                listView.setSelection(listView.getCount() - 1);
+            }
+        });
     }
 }
