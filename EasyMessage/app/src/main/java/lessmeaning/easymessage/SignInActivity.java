@@ -91,7 +91,6 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
                     loading.setVisibility(View.VISIBLE);
                     localCore.signin(userName.getText().toString(), password.getText().toString());
                     success();
-                    finish();
                 }
                 break;
             case (R.id.signup):
@@ -103,7 +102,6 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
                     loading.setVisibility(View.VISIBLE);
                     localCore.signup(userName.getText().toString(), password.getText().toString());
                     success();
-                    finish();
                 }
                 break;
         }
