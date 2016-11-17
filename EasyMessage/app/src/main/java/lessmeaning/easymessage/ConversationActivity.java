@@ -7,18 +7,14 @@ import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.TextView;
-import android.widget.Toast;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 
 /**
@@ -27,6 +23,7 @@ import java.util.ArrayList;
 
 public class ConversationActivity extends AppCompatActivity implements View.OnClickListener {
 
+    private static final String TAG = "newITIS";
     private Button mCreate;
     private ConversationAdapter adapter;
     private ListView mListView;
@@ -42,25 +39,16 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
         setContentView(R.layout.activity_conversation);
         mCreate = (Button) findViewById(R.id.create_button);
         mListView = (ListView) findViewById(R.id.conversations);
-        userName = (EditText) findViewById(R.id.username);
+        userName = (EditText) findViewById(R.id.find_username);
         mCreate.setOnClickListener(this);
         localCore = new LocalCore(this);
         if (!localCore.checkAuthorization()) {
-            inSignedIn();
+            goToSignInActivity();
         }
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 goTo((int)adapter.getItem(position).getConversationID());
-            }
-        });
-        dialog = new AlertDialog.Builder(this);
-        dialog.setTitle("Error!");
-        dialog.setCancelable(true);
-        dialog.setNegativeButton("Try again", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
             }
         });
     }
@@ -75,6 +63,7 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
     protected void onResume() {
         super.onResume();
         localCore.connectToService();
+        localCore.sendConversations();
     }
 
     @Override
@@ -98,14 +87,33 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
         mListView.setAdapter(adapter);
     }
 
-    public void fail(String reason) {
-        dialog.create();
-        dialog.show();
+    public void fail(final String reason) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                dialog = new AlertDialog.Builder(ConversationActivity.this);
+                dialog.setTitle("Error! reason is " + reason);
+                dialog.setCancelable(true);
+                dialog.setNegativeButton("Try again", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+                dialog.create();
+                dialog.show();
+            }
+        });
     }
 
     public void success() {
-        Intent intent = new Intent(this, MessagesActivity.class);
-        startActivity(intent);
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Intent intent = new Intent(ConversationActivity.this, MessagesActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 
     public void hideKeayboard() {
@@ -116,13 +124,18 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
         }
     }
 
-    public void goTo(int conversationID) {
-        Intent intent = new Intent(this, MessagesActivity.class);
-        intent.putExtra(CONVERSATION_ID, conversationID);
-        startActivity(intent);
+    public void goTo(final int conversationID) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Intent intent = new Intent(ConversationActivity.this, MessagesActivity.class);
+                intent.putExtra(CONVERSATION_ID, conversationID);
+                startActivity(intent);
+            }
+        });
     }
 
-    public void inSignedIn() {
+    public void goToSignInActivity() {
         Intent intent = new Intent(this, SignInActivity.class);
         startActivity(intent);
     }

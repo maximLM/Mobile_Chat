@@ -49,6 +49,7 @@ public class MessageAdapter extends BaseAdapter {
         }
 
         Row row = getRow(position);
+        ((TextView) view.findViewById(R.id.sender)).setText(row.getUserSender());
         ((TextView) view.findViewById(R.id.message)).setText(row.getContent());
         return view;
     }

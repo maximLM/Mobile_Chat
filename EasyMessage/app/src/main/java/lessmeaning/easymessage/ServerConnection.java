@@ -47,7 +47,10 @@ public class ServerConnection {
                 buffer.append(line);
             }
             rawInput = buffer.toString();
-            Log.d(TAG, "checkServer: responseCode = " + respondseCode);
+            if (rawInput != null) {
+                Log.d(TAG, "lnk : " + lnk);
+                Log.d(TAG, "checkServer: rawInput = " + rawInput);
+            }
         } catch (ProtocolException e) {
             e.printStackTrace();
         } catch (MalformedURLException e) {
@@ -67,6 +70,7 @@ public class ServerConnection {
             }
         }
         if (rawInput == null || rawInput.equals("")) return null;
+        Log.d(TAG, "raw again: " + rawInput);
         return rawInput;
     }
 
@@ -74,9 +78,10 @@ public class ServerConnection {
     public static ArrayList<Row> getMessages(String username, long time) {
         String lnk = null;
         try {
+            String utf = "UTF-8";
             lnk = "http://e-chat.h1n.ru/getmessages.php?username=" +
-                    URLEncoder.encode(username, "UTF-8")
-                    +"&time=" + URLEncoder.encode(String.valueOf(time), "UTF-8");
+                    URLEncoder.encode(username, utf)
+                    +"&time=" + URLEncoder.encode(String.valueOf(time), utf);
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
@@ -97,9 +102,10 @@ public class ServerConnection {
     public static ArrayList<Conversation> getConversations(String username, long time) {
         String lnk = null;
         try {
+            String utf = "UTF-8";
             lnk = "http://e-chat.h1n.ru/getconversations.php?username=" +
-                    URLEncoder.encode(username, "UTF-8")
-                    + "&time=" + URLEncoder.encode(String.valueOf(time), "UTF-8");
+                    URLEncoder.encode(username, utf)
+                    + "&time=" + URLEncoder.encode(String.valueOf(time), utf);
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }

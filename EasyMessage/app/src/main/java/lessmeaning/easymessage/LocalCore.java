@@ -18,6 +18,10 @@ import java.util.Collections;
  */
 public class LocalCore {
 
+//    left right
+
+
+//    private static final String TAG = "newITIS";
     private LocalDataBase db;
     private BroadcastReceiver brv;
     private Activity activity;
@@ -31,6 +35,7 @@ public class LocalCore {
         this.convID = convID;
         clazz = activity.getClass();
         db = new LocalDataBase(activity);
+//        Log.d(TAG, "LocalCore: username is " + db.getUsername());
         brv = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -42,6 +47,10 @@ public class LocalCore {
                 }
             }
         };
+        if (clazz == MessagesActivity.class)
+            sendApproved();
+        else if (clazz == ConversationActivity.class)
+            sendConversations();
         connectToService();
     }
 
@@ -55,12 +64,16 @@ public class LocalCore {
 
     public void sendConversations() {
         ArrayList<Conversation> convs = db.getConversation();
+        if (convs == null) return;
+        if (convs.size() > 0)
+            convs.remove(0);
         Collections.sort(convs);
         ((ConversationActivity)activity).reloadList(convs);
     }
 
     public void sendApproved() {
-        ArrayList<Row> rows = db.getApproved();
+        if (clazz != MessagesActivity.class) return;
+        ArrayList<Row> rows = db.getApproved(convID);
         Collections.sort(rows);
 
         ((MessagesActivity)activity).reloadList(rows);
@@ -76,7 +89,7 @@ public class LocalCore {
         return false;
     }
 
-    private void connectToService() {
+    public void connectToService() {
         try {
             if (brv != null) activity.unregisterReceiver(brv);
         } catch (IllegalArgumentException e) { }
@@ -99,12 +112,21 @@ public class LocalCore {
         } catch (IllegalArgumentException e) { }
     }
 
+    public void logOut() {
+        db.deleteEverything();
+        activity.startActivity(new Intent(activity, SignInActivity.class));
+    }
+
     public void signin(final String username,final String password) {
         if (clazz != SignInActivity.class) return;
-        if (db.getUsername() != null)
-            ((SignInActivity)activity).fail("You are already logged");
-        if (!ServerConnection.checkConnection(activity))
-            ((SignInActivity)activity).fail("No Connection");
+        if (db.getUsername() != null) {
+            ((SignInActivity) activity).fail("You are already logged");
+            return;
+        }
+        if (!ServerConnection.checkConnection(activity)) {
+            ((SignInActivity) activity).fail("No Connection");
+            return;
+        }
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -121,16 +143,58 @@ public class LocalCore {
                 }
                 String success = ServerConnection.executeQuery(lnk);
                 String fail = "Password incorrect or user does not exists";
-                if (success.contains("success")) {
+                if (success != null && success.contains("success")) {
                     signedIn(username, fail);
                 } else {
-                    signedIn(null, fail);
+                    if (success == null) {
+                        signedIn(null, "Trouble with connection");
+                    } else {
+                        signedIn(null, fail);
+                    }
                 }
             }
-        });
+        }).start();
+    }
+
+    public void createConversation(final String username) {
+        if (clazz != ConversationActivity.class) return;
+        if (db.getUsername() == null) {
+            ((ConversationActivity) activity).fail("You are not logged");
+            return;
+        }
+        if (!ServerConnection.checkConnection(activity)) {
+            ((ConversationActivity) activity).fail("No Connection");
+            return;
+        }
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                String utf = "UTF-8";
+                String lnk = null;
+                try {
+                    lnk = "http://e-chat.h1n.ru/createconversation.php?user1="
+                            + URLEncoder.encode(db.getUsername(), utf)
+                            + "&user2="
+                            + URLEncoder.encode(username, utf);
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                    return;
+                }
+                final String fail = ServerConnection.executeQuery(lnk);
+                if (fail == null) {
+                    ((ConversationActivity) activity).fail("trouble with connection");
+                } else if (fail.contains("fail")) {
+                    ((ConversationActivity) activity).fail("user does not exists");
+                }
+            }
+        }).start();
     }
 
     private void signedIn(String username, final String fail) {
+        if (clazz != SignInActivity.class) {
+//            Log.d(TAG, "signedIn: error activity is not signin");
+            return;
+        }
         if (username == null) {
             activity.runOnUiThread(new Runnable() {
                 @Override
@@ -138,22 +202,29 @@ public class LocalCore {
                     ((SignInActivity) activity).fail(fail);
                 }
             });
+            return;
         }
         ArrayList<Conversation> convs = new ArrayList<>();
         convs.add(new Conversation(-12, username, 0));
-        convs.addAll(ServerConnection.getConversations(username, 0));
+        ArrayList<Conversation> fromServer = ServerConnection.getConversations(username, 0);
+        if (fromServer != null)
+            convs.addAll(fromServer);
         try {
             db.setConversations(convs);
-            db.setApproved(ServerConnection.getMessages(username, 0));
+            ArrayList<Row> rowsFromServer = ServerConnection.getMessages(username, 0);
+            if (rowsFromServer != null)
+                db.setApproved(rowsFromServer);
         } catch (UnsupportedOperationException e) {
             activity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    ((SignInActivity) activity).fail("set gave exception");
+                    ((SignInActivity) activity).fail("you are already logged");
                 }
             });
+//            Log.d(TAG, "signedIn: set gave exeption");
             return;
         }
+//        Log.d(TAG, "signedIn: db.getUserName() = " + db.getUsername());
         activity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -165,10 +236,14 @@ public class LocalCore {
 
     public void signup(final String username, final String password) {
         if (clazz != SignInActivity.class) return;
-        if (db.getUsername() != null)
-            ((SignInActivity)activity).fail("You are already logged");
-        if (!ServerConnection.checkConnection(activity))
-            ((SignInActivity)activity).fail("No Connection");
+        if (db.getUsername() != null) {
+            ((SignInActivity) activity).fail("You are already logged");
+            return;
+        }
+        if (!ServerConnection.checkConnection(activity)) {
+            ((SignInActivity) activity).fail("No Connection");
+            return;
+        }
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -185,13 +260,17 @@ public class LocalCore {
                 }
                 String success = ServerConnection.executeQuery(lnk);
                 String fail = "User already exists";
-                if (success.contains("success")) {
+                if (success != null && success.contains("success")) {
                     signedIn(username, fail);
                 } else {
                     signedIn(null, fail);
                 }
             }
-        });
+        }).start();
     }
 
+    public boolean checkAuthorization() {
+        String username = db.getUsername();
+        return username != null && !username.equals("");
+    }
 }
