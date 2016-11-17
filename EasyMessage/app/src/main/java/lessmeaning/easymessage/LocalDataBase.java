@@ -208,8 +208,10 @@ public class LocalDataBase extends SQLiteOpenHelper implements BaseColumns {
         SQLiteDatabase chatDB = this.getWritableDatabase();
         Cursor c = chatDB.query(TABLE_NAME_APPROVED, new String[] {"MAX(_id)", TIME}, null, null, null, null, null);
         long lastTimeMess = 0;
-        if (c.moveToFirst())
+        if (c.moveToFirst()) {
             lastTimeMess = c.getLong(c.getColumnIndex(TIME));
+            Log.d("newITIS", "last fist time is " + lastTimeMess);
+        }
         c.close();
         return  lastTimeMess;
     }

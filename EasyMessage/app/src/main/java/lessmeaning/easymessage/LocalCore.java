@@ -18,6 +18,10 @@ import java.util.Collections;
  */
 public class LocalCore {
 
+//    left right
+
+
+//    private static final String TAG = "newITIS";
     private LocalDataBase db;
     private BroadcastReceiver brv;
     private Activity activity;
@@ -31,6 +35,7 @@ public class LocalCore {
         this.convID = convID;
         clazz = activity.getClass();
         db = new LocalDataBase(activity);
+//        Log.d(TAG, "LocalCore: username is " + db.getUsername());
         brv = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -59,6 +64,9 @@ public class LocalCore {
 
     public void sendConversations() {
         ArrayList<Conversation> convs = db.getConversation();
+        if (convs == null) return;
+        if (convs.size() > 0)
+            convs.remove(0);
         Collections.sort(convs);
         ((ConversationActivity)activity).reloadList(convs);
     }
@@ -111,10 +119,14 @@ public class LocalCore {
 
     public void signin(final String username,final String password) {
         if (clazz != SignInActivity.class) return;
-        if (db.getUsername() != null)
-            ((SignInActivity)activity).fail("You are already logged");
-        if (!ServerConnection.checkConnection(activity))
-            ((SignInActivity)activity).fail("No Connection");
+        if (db.getUsername() != null) {
+            ((SignInActivity) activity).fail("You are already logged");
+            return;
+        }
+        if (!ServerConnection.checkConnection(activity)) {
+            ((SignInActivity) activity).fail("No Connection");
+            return;
+        }
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -131,10 +143,14 @@ public class LocalCore {
                 }
                 String success = ServerConnection.executeQuery(lnk);
                 String fail = "Password incorrect or user does not exists";
-                if (success.contains("success")) {
+                if (success != null && success.contains("success")) {
                     signedIn(username, fail);
                 } else {
-                    signedIn(null, fail);
+                    if (success == null) {
+                        signedIn(null, "Trouble with connection");
+                    } else {
+                        signedIn(null, fail);
+                    }
                 }
             }
         }).start();
@@ -142,10 +158,14 @@ public class LocalCore {
 
     public void createConversation(final String username) {
         if (clazz != ConversationActivity.class) return;
-        if (db.getUsername() != null)
-            ((ConversationActivity)activity).fail("You are already logged");
-        if (!ServerConnection.checkConnection(activity))
-            ((ConversationActivity)activity).fail("No Connection");
+        if (db.getUsername() == null) {
+            ((ConversationActivity) activity).fail("You are not logged");
+            return;
+        }
+        if (!ServerConnection.checkConnection(activity)) {
+            ((ConversationActivity) activity).fail("No Connection");
+            return;
+        }
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -160,18 +180,21 @@ public class LocalCore {
                     e.printStackTrace();
                     return;
                 }
-                String success = ServerConnection.executeQuery(lnk);
-                String fail = "This user doesnot exist";
-                if (!success.contains("fail")) {
-                    signedIn(username, fail);
-                } else {
-                    signedIn(null, fail);
+                final String fail = ServerConnection.executeQuery(lnk);
+                if (fail == null) {
+                    ((ConversationActivity) activity).fail("trouble with connection");
+                } else if (fail.contains("fail")) {
+                    ((ConversationActivity) activity).fail("user does not exists");
                 }
             }
         }).start();
     }
 
     private void signedIn(String username, final String fail) {
+        if (clazz != SignInActivity.class) {
+//            Log.d(TAG, "signedIn: error activity is not signin");
+            return;
+        }
         if (username == null) {
             activity.runOnUiThread(new Runnable() {
                 @Override
@@ -179,22 +202,29 @@ public class LocalCore {
                     ((SignInActivity) activity).fail(fail);
                 }
             });
+            return;
         }
         ArrayList<Conversation> convs = new ArrayList<>();
         convs.add(new Conversation(-12, username, 0));
-        convs.addAll(ServerConnection.getConversations(username, 0));
+        ArrayList<Conversation> fromServer = ServerConnection.getConversations(username, 0);
+        if (fromServer != null)
+            convs.addAll(fromServer);
         try {
             db.setConversations(convs);
-            db.setApproved(ServerConnection.getMessages(username, 0));
+            ArrayList<Row> rowsFromServer = ServerConnection.getMessages(username, 0);
+            if (rowsFromServer != null)
+                db.setApproved(rowsFromServer);
         } catch (UnsupportedOperationException e) {
             activity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    ((SignInActivity) activity).fail("set gave exception");
+                    ((SignInActivity) activity).fail("you are already logged");
                 }
             });
+//            Log.d(TAG, "signedIn: set gave exeption");
             return;
         }
+//        Log.d(TAG, "signedIn: db.getUserName() = " + db.getUsername());
         activity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -206,10 +236,14 @@ public class LocalCore {
 
     public void signup(final String username, final String password) {
         if (clazz != SignInActivity.class) return;
-        if (db.getUsername() != null)
-            ((SignInActivity)activity).fail("You are already logged");
-        if (!ServerConnection.checkConnection(activity))
-            ((SignInActivity)activity).fail("No Connection");
+        if (db.getUsername() != null) {
+            ((SignInActivity) activity).fail("You are already logged");
+            return;
+        }
+        if (!ServerConnection.checkConnection(activity)) {
+            ((SignInActivity) activity).fail("No Connection");
+            return;
+        }
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -226,7 +260,7 @@ public class LocalCore {
                 }
                 String success = ServerConnection.executeQuery(lnk);
                 String fail = "User already exists";
-                if (success.contains("success")) {
+                if (success != null && success.contains("success")) {
                     signedIn(username, fail);
                 } else {
                     signedIn(null, fail);
@@ -235,4 +269,8 @@ public class LocalCore {
         }).start();
     }
 
+    public boolean checkAuthorization() {
+        String username = db.getUsername();
+        return username != null && !username.equals("");
+    }
 }

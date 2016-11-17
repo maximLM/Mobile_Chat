@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.method.PasswordTransformationMethod;
+import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
@@ -22,6 +23,7 @@ import android.widget.ProgressBar;
 
 public class SignInActivity extends AppCompatActivity implements View.OnClickListener {
 
+    private static final String TAG = "newITIS";
     private EditText userName;
     private EditText password;
     private Button signIn;
@@ -90,8 +92,6 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
                 else {
                     loading.setVisibility(View.VISIBLE);
                     localCore.signin(userName.getText().toString(), password.getText().toString());
-                    success();
-                    finish();
                 }
                 break;
             case (R.id.signup):
@@ -102,24 +102,32 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
                 else {
                     loading.setVisibility(View.VISIBLE);
                     localCore.signup(userName.getText().toString(), password.getText().toString());
-                    success();
-                    finish();
                 }
                 break;
         }
     }
 
-    public void fail(String reason) {
-        loading.setVisibility(View.INVISIBLE);
-        dialog.setMessage(reason);
-        dialog.create();
-        dialog.show();
+    public void fail(final String reason) {
+        Log.d(TAG, "fail : " + reason);
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                loading.setVisibility(View.INVISIBLE);
+                dialog.setMessage(reason);
+                dialog.create().show();
+            }
+        });
     }
 
     public void success() {
-        loading.setVisibility(View.INVISIBLE);
-        Intent intent = new Intent(this, ConversationActivity.class);
-        startActivity(intent);
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                loading.setVisibility(View.INVISIBLE);
+                Intent intent = new Intent(SignInActivity.this, ConversationActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 
     public boolean authorizationErrorChecking() {

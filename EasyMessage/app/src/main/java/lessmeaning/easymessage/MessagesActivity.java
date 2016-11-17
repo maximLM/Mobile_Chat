@@ -83,6 +83,7 @@ public class MessagesActivity extends AppCompatActivity implements View.OnClickL
     protected void onResume() {
         super.onResume();
         localCore.connectToService();
+        localCore.sendApproved();
     }
 
     @Override

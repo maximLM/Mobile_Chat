@@ -47,7 +47,10 @@ public class ServerConnection {
                 buffer.append(line);
             }
             rawInput = buffer.toString();
-            Log.d(TAG, "checkServer: responseCode = " + respondseCode);
+            if (rawInput != null) {
+                Log.d(TAG, "lnk : " + lnk);
+                Log.d(TAG, "checkServer: rawInput = " + rawInput);
+            }
         } catch (ProtocolException e) {
             e.printStackTrace();
         } catch (MalformedURLException e) {
@@ -67,6 +70,7 @@ public class ServerConnection {
             }
         }
         if (rawInput == null || rawInput.equals("")) return null;
+        Log.d(TAG, "raw again: " + rawInput);
         return rawInput;
     }
 
