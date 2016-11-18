@@ -256,12 +256,14 @@ public class LocalDataBase extends SQLiteOpenHelper implements BaseColumns {
     public boolean haveConversation(String username) {
         boolean haveConv = false;
         SQLiteDatabase chatDB = this.getWritableDatabase();
-        Cursor c = chatDB.query(TABLE_NAME_CONVERSATION, new String[] {"MIN(_id)"}, USER + " =?", new String[] {username}, null, null, null);
-        if(c.moveToFirst()) {
+        Cursor c = chatDB.query(TABLE_NAME_CONVERSATION, null, USER + " =?", new String[] {username}, null, null, null);
+        if(c.getCount() != 0) {
             haveConv = true;
         }
-
+        Log.d("SOFA", "username - " + username + ", have con - " + haveConv + "count" + c.getCount());
+        c.close();
         return haveConv;
+
     }
 
 

@@ -212,6 +212,7 @@ public class LocalCore {
         new Thread(new Runnable() {
             @Override
             public void run() {
+                Log.d("MIMI", "create dialog on server");
                 String utf = "UTF-8";
                 String lnk = null;
                 try {
