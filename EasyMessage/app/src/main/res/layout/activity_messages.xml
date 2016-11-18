@@ -41,7 +41,7 @@
                 android:layout_width="60dp"
                 android:layout_alignParentBottom="true"
                 android:layout_height="60dp"
-                android:background="@mipmap/send_button" />
+                android:background="@android:drawable/ic_menu_send" />
         </LinearLayout>
 
 </LinearLayout>

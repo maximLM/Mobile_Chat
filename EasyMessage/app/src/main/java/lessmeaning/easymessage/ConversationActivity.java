@@ -4,12 +4,16 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
+import android.view.KeyEvent;;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
+import android.support.design.widget.NavigationView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -20,7 +24,7 @@ import java.util.ArrayList;
  * Created by 1 on 11.11.2016.
  */
 
-public class ConversationActivity extends AppCompatActivity implements View.OnClickListener {
+public class ConversationActivity extends AppCompatActivity implements View.OnClickListener, NavigationView.OnNavigationItemSelectedListener {
 
     private static final String TAG = "newITIS";
     private Button mCreate;
@@ -28,6 +32,8 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
     private ListView mListView;
     private EditText userName;
     private LocalCore localCore;
+    private DrawerLayout drawerLayout;
+    private NavigationView navigationView;
     private AlertDialog.Builder dialog;
     public static final String CONVERSATION_ID = "CONVERSATION_ID";
 
@@ -35,7 +41,10 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
     @Override
     protected void onCreate(Bundle SavedInstanceState) {
         super.onCreate(SavedInstanceState);
-        setContentView(R.layout.activity_conversation);
+        setContentView(R.layout.drawer);
+        drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
         mCreate = (Button) findViewById(R.id.create_button);
         mListView = (ListView) findViewById(R.id.conversations);
         userName = (EditText) findViewById(R.id.find_username);
@@ -72,6 +81,16 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
                 hideKeayboard();
                 localCore.createConversation(userName.getText().toString());
                 break;
+        }
+    }
+
+
+    @Override
+    public void onBackPressed() {
+        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+            drawerLayout.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
         }
     }
 
@@ -130,6 +149,26 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
 
     public void goToSignInActivity() {
         Intent intent = new Intent(this, SignInActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);
+        finish();
+    }
+
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        switch (id) {
+            case R.id.nav_home:
+                break;
+            case R.id.nav_log_out:
+                localCore.logOut();
+                Intent intent = new Intent(this, SignInActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(intent);
+                finish();
+                break;
+        }
+        drawerLayout.closeDrawer(GravityCompat.START);
+        return true;
     }
 }

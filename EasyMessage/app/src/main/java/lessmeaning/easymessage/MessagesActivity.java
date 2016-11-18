@@ -5,8 +5,10 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.os.Handler;
 import android.os.Message;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -27,8 +29,11 @@ public class MessagesActivity extends AppCompatActivity implements View.OnClickL
     private LocalCore localCore;
     private EditText mEditText;
     private MessageAdapter adapter;
+    private String username;
+    private DrawerLayout drawerLayout;
+    private NavigationView navigationView;
 
-   void ask(final String permission) {
+    void ask(final String permission) {
        if (ContextCompat.checkSelfPermission(this, permission
                )
                != PackageManager.PERMISSION_GRANTED) {
@@ -122,5 +127,13 @@ public class MessagesActivity extends AppCompatActivity implements View.OnClickL
                 listView.setSelection(listView.getCount() - 1);
             }
         });
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 }

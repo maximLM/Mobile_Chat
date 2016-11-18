@@ -22,6 +22,7 @@ public class LocalCore {
 //    left right
 
 
+
     private static final String TAG = "newITIS";
     private LocalDataBase db;
     private BroadcastReceiver brv;
@@ -41,7 +42,7 @@ public class LocalCore {
             @Override
             public void onReceive(Context context, Intent intent) {
                 boolean isConv = intent.getBooleanExtra(IS_CONVERSATION, false);
-                if (isConv && clazz == ConversationActivity.class){
+                if (isConv && clazz == ConversationActivity.class) {
                     sendConversations();
                 } else if (!isConv ) {
                     if (clazz == MessagesActivity.class) {
@@ -52,9 +53,10 @@ public class LocalCore {
                 }
             }
         };
-        if (clazz == MessagesActivity.class)
+        if (clazz == MessagesActivity.class) {
+            ((MessagesActivity) activity).setUsername(db.getUsername());
             sendApproved();
-        else if (clazz == ConversationActivity.class)
+        } else if (clazz == ConversationActivity.class)
             sendConversations();
         connectToService();
     }
@@ -105,7 +107,7 @@ public class LocalCore {
         ArrayList<Row> rows = db.getApproved(convID);
         Collections.sort(rows);
 
-        ((MessagesActivity)activity).reloadList(rows);
+        ((MessagesActivity) activity).reloadList(rows);
     }
 
     private boolean isServiceRunning(Class<?> serviceClass, Context context) {
@@ -121,7 +123,8 @@ public class LocalCore {
     public void connectToService() {
         try {
             if (brv != null) activity.unregisterReceiver(brv);
-        } catch (IllegalArgumentException e) { }
+        } catch (IllegalArgumentException e) {
+        }
         if (clazz == MessagesActivity.class || clazz == ConversationActivity.class)
             activity.registerReceiver(brv, new IntentFilter(BROADCAST));
         if (isServiceRunning(Merger.class, activity)) {
@@ -138,7 +141,8 @@ public class LocalCore {
     public void disconnectService() {
         try {
             if (brv != null) activity.unregisterReceiver(brv);
-        } catch (IllegalArgumentException e) { }
+        } catch (IllegalArgumentException e) {
+        }
     }
 
     public void logOut() {
@@ -146,7 +150,7 @@ public class LocalCore {
         activity.startActivity(new Intent(activity, SignInActivity.class));
     }
 
-    public void signin(final String username,final String password) {
+    public void signin(final String username, final String password) {
         if (clazz != SignInActivity.class) return;
         if (db.getUsername() != null) {
             ((SignInActivity) activity).fail("You are already logged");
@@ -262,7 +266,9 @@ public class LocalCore {
             @Override
             public void run() {
                 Intent intent = new Intent(activity, ConversationActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 activity.startActivity(intent);
+                activity.finish();
             }
         });
     }
