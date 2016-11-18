@@ -202,6 +202,7 @@ public class LocalCore {
         if (db.haveConversation(username)) {
             ((ConversationActivity) activity)
                     .fail("You already created conversation with this friend");
+            return;
         }
         new Thread(new Runnable() {
             @Override
