@@ -232,7 +232,9 @@ public class LocalCore {
             @Override
             public void run() {
                 Intent intent = new Intent(activity, ConversationActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 activity.startActivity(intent);
+                activity.finish();
             }
         });
     }

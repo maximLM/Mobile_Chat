@@ -86,16 +86,6 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
 
 
     @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK) {
-            finish();
-            return true;
-        } else {
-            return super.onKeyDown(keyCode, event);
-        }
-    }
-
-    @Override
     public void onBackPressed() {
         if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
             drawerLayout.closeDrawer(GravityCompat.START);
@@ -159,7 +149,9 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
 
     public void goToSignInActivity() {
         Intent intent = new Intent(this, SignInActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);
+        finish();
     }
 
     @Override
@@ -169,8 +161,14 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
             case R.id.nav_home:
                 break;
             case R.id.nav_log_out:
-                
+                localCore.logOut();
+                Intent intent = new Intent(this, SignInActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(intent);
+                finish();
+                break;
         }
-        return false;
+        drawerLayout.closeDrawer(GravityCompat.START);
+        return true;
     }
 }

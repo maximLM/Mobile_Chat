@@ -8,6 +8,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.method.PasswordTransformationMethod;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
@@ -79,6 +80,16 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
     protected void onResume() {
         super.onResume();
         localCore.connectToService();
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            finish();
+            return true;
+        } else {
+            return super.onKeyDown(keyCode, event);
+        }
     }
 
     @Override
