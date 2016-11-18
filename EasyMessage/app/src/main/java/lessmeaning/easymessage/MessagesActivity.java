@@ -27,8 +27,9 @@ public class MessagesActivity extends AppCompatActivity implements View.OnClickL
     private LocalCore localCore;
     private EditText mEditText;
     private MessageAdapter adapter;
+    private String username;
 
-   void ask(final String permission) {
+    void ask(final String permission) {
        if (ContextCompat.checkSelfPermission(this, permission
                )
                != PackageManager.PERMISSION_GRANTED) {
@@ -122,5 +123,13 @@ public class MessagesActivity extends AppCompatActivity implements View.OnClickL
                 listView.setSelection(listView.getCount() - 1);
             }
         });
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 }
