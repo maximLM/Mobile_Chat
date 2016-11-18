@@ -150,7 +150,7 @@ public class LocalCore {
         activity.startActivity(new Intent(activity, SignInActivity.class));
     }
 
-    public void signin(final String username, final String password) {
+    public void signin(String input, final String password) {
         if (clazz != SignInActivity.class) return;
         if (db.getUsername() != null) {
             ((SignInActivity) activity).fail("You are already logged");
@@ -160,6 +160,7 @@ public class LocalCore {
             ((SignInActivity) activity).fail("No Connection");
             return;
         }
+        final String username = toUsername(input);
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -187,6 +188,10 @@ public class LocalCore {
                 }
             }
         }).start();
+    }
+
+    private String toUsername(String input) {
+        return input.toLowerCase().replaceAll(" ", "");
     }
 
     public void createConversation(final String username) {
@@ -274,7 +279,7 @@ public class LocalCore {
         });
     }
 
-    public void signup(final String username, final String password) {
+    public void signup(String input, final String password) {
         if (clazz != SignInActivity.class) return;
         if (db.getUsername() != null) {
             ((SignInActivity) activity).fail("You are already logged");
@@ -284,6 +289,7 @@ public class LocalCore {
             ((SignInActivity) activity).fail("No Connection");
             return;
         }
+        final String username = toUsername(input);
         new Thread(new Runnable() {
             @Override
             public void run() {
