@@ -5,7 +5,7 @@ package lessmeaning.easymessage;
  */
 public enum  Fields {
 
-    ACTION("action"), AUTHOR("username"), CONVERSATION("conversation"),
+    ACTION("action"), AUTHOR("username"), CONVERSATION("conversationID"),
     TIME("time"), MESSAGE("content"), SUCCESS("success");
 
     private String name;

@@ -24,9 +24,9 @@ import java.util.Collections;
 
 public class Merger extends Service implements Runnable {
 
-    private static final String TAG = "supertesting";
+//        private static final String TAG = "newITIS";
     private volatile boolean running;
-    private LocalDataBase localdb;
+    private volatile LocalDataBase localdb;
     private final String SERVER_NAME = "http://e-chat.h1n.ru";
 
     @Override
@@ -35,47 +35,49 @@ public class Merger extends Service implements Runnable {
         localdb = new LocalDataBase(this);
         new Thread(this).start();
         running = true;
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while (running) {
-                    checkLocal();
-                }
-            }
-        });
     }
 
     @Override
     public void run() {
         while (running) {
-            checkServer();
-
             try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
+                checkLocal();
+                checkServer();
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
     }
 
     private void checkServer() {
-        ArrayList<Conversation> convs = ServerConnection.getConversations(localdb.getUsername(), localdb.getLastTimeConv());
+        String username = localdb.getUsername();
+        if (username == null || username.equals("")) return;
+        ArrayList<Conversation> convs = ServerConnection.getConversations(localdb.getUsername(),
+                localdb.getLastTimeConv());
         if (convs != null && convs.size() > 0) {
             localdb.addConversations(convs);
-            sendMsgToUpd("New Conversation with " + convs.get(convs.size() - 1).getFriend(), true);
+            sendMsgToUpd("New Conversation with " + convs.get(convs.size() - 1).getFriend(), "", 0, true);
         }
-        ArrayList<Row> rows = ServerConnection.getMessages(localdb.getUsername(), localdb.getLastTimeMess());
+        ArrayList<Row> rows = ServerConnection.getMessages(localdb.getUsername(),
+                localdb.getLastTimeMess());
         if (rows != null && rows.size() > 0) {
             localdb.addApproved(rows);
-            sendMsgToUpd(rows.get(rows.size() - 1).getContent(), false);
+            Row row = rows.get(rows.size() - 1);
+            sendMsgToUpd(row.getContent(), row.getUserSender(), (int) row.getConversationID(), false);
         }
     }
 
     private String generateLink(long convID, String msg) throws UnsupportedEncodingException {
-        return SERVER_NAME + "/send.php?user=" +
-                URLEncoder.encode(localdb.getUsername(), "UTF-8") + "&conversationID=" +
-                URLEncoder.encode(String.valueOf(convID))
-                + "&message=" + URLEncoder.encode(msg.trim(), "UTF-8");
+        String utf = "UTF-8";
+        return SERVER_NAME + "/send.php?username=" +
+                URLEncoder.encode(localdb.getUsername(), utf) + "&conversationID=" +
+                URLEncoder.encode(String.valueOf(convID), utf)
+                + "&content=" + URLEncoder.encode(msg.trim(), utf);
     }
 
     private boolean sendToServer(long convID, String msg) {
@@ -84,14 +86,13 @@ public class Merger extends Service implements Runnable {
             lnk = generateLink(convID, msg);
         } catch (UnsupportedEncodingException e) {
             try {
-                lnk = generateLink(-999, "UNSUPPORTED_ENCODING_PAY_ATTENTION_USER_IS"
+                lnk = generateLink(-999, "UNSUPPORTED_ENCODING_PAY_ATTENTION_USER_IS_"
                         + localdb.getUsername());
             } catch (UnsupportedEncodingException e1) {
                 throw new RuntimeException("UNREAL SITUATION");
             }
         }
         boolean success = false;
-        Log.d(TAG, "sendToServer: " + lnk);
         HttpURLConnection conn = null;
         BufferedReader in = null;
         try {
@@ -104,10 +105,10 @@ public class Merger extends Service implements Runnable {
             success = HttpURLConnection.HTTP_OK == conn.getResponseCode();
         } catch (MalformedURLException e) {
             e.printStackTrace();
-            Log.d(TAG, "sendToServer: malformed");
+//            Log.d(TAG, "sendToServer: malformed");
         } catch (IOException e) {
             e.printStackTrace();
-            Log.d(TAG, "sendToServer: ioex");
+//            Log.d(TAG, "sendToServer: ioex");
         } finally {
             if (conn != null) {
                 conn.disconnect();
@@ -120,7 +121,6 @@ public class Merger extends Service implements Runnable {
                 }
             }
         }
-        Log.d(TAG, "sendToServer: success = " + success);
         return success;
     }
 
@@ -140,12 +140,17 @@ public class Merger extends Service implements Runnable {
         }
     }
 
-    private void sendMsgToUpd(String msg, boolean isConv) {
+    private void sendMsgToUpd(String msg,String sender, int conversationId, boolean isConv) {
+        String user = localdb.getUsername();
+        if (user == null) return;
         Intent intent = new Intent(LocalCore.BROADCAST);
         intent.putExtra(LocalCore.IS_CONVERSATION, isConv);
         sendBroadcast(intent);
+        if (sender != null && sender.equals(user)) return;
         intent = new Intent(this, MessageReceiver.class);
         intent.putExtra(MessageReceiver.MESSAGE, msg);
+        intent.putExtra(MessageReceiver.CONVERSATION_ID, conversationId);
+        intent.putExtra(MessageReceiver.SENDER_NAME, sender);
         sendBroadcast(intent);
     }
 

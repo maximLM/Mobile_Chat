@@ -16,6 +16,7 @@ import java.util.ArrayList;
  */
 
 public class LocalDataBase extends SQLiteOpenHelper implements BaseColumns {
+    private static final String TAG = "newITIS";
     String myLog = "test db";
 
     public static final String TABLE_NAME_APPROVED = "ApprovedTable";
@@ -122,9 +123,10 @@ public class LocalDataBase extends SQLiteOpenHelper implements BaseColumns {
         if(c.moveToFirst()){
             do {
                 String content = c.getString(c.getColumnIndex(CONTENT));
-                long time = c.getInt(c.getColumnIndex(TIME));
+                long time = c.getLong(c.getColumnIndex(TIME));
+                Log.d(TAG, "get Approved time of " + " = " + time);
                 String userSender = c.getString(c.getColumnIndex(USER));
-                long conversationID = c.getInt(c.getColumnIndex(CONVERSATION_ID));
+                long conversationID = c.getLong(c.getColumnIndex(CONVERSATION_ID));
                 Row r = new Row(conversationID, userSender, content, time);
                 row.add(r);
             } while (c.moveToNext());
@@ -206,8 +208,10 @@ public class LocalDataBase extends SQLiteOpenHelper implements BaseColumns {
         SQLiteDatabase chatDB = this.getWritableDatabase();
         Cursor c = chatDB.query(TABLE_NAME_APPROVED, new String[] {"MAX(_id)", TIME}, null, null, null, null, null);
         long lastTimeMess = 0;
-        if (c.moveToFirst())
+        if (c.moveToFirst()) {
             lastTimeMess = c.getLong(c.getColumnIndex(TIME));
+            Log.d("newITIS", "last fist time is " + lastTimeMess);
+        }
         c.close();
         return  lastTimeMess;
     }
@@ -238,16 +242,16 @@ public class LocalDataBase extends SQLiteOpenHelper implements BaseColumns {
         SQLiteDatabase chatDB = this.getWritableDatabase();
         String buf = "" + conversationID;
         String[] conv = {buf};
-        String cont = "", user = "";
-        long time = 0;
-        Cursor c = chatDB.query(TABLE_NAME_APPROVED , new String[] {"MAX(_id)", CONTENT, TIME, USER}, CONVERSATION_ID + " = ?", conv, null, null, null);
+        String lastRow = "";
+        Cursor c = chatDB.query(TABLE_NAME_APPROVED , new String[] {"MAX(_id)", CONTENT, TIME}, CONVERSATION_ID + " = ?", conv, null, null, null);
+        long time = -1234;
         if(c.moveToFirst()){
-            cont = c.getString(c.getColumnIndex(CONTENT));
-            user = c.getString(c.getColumnIndex(USER));
-            time = c.getInt(c.getColumnIndex(TIME));
+            lastRow = c.getString(c.getColumnIndex(CONTENT));
+            time = c.getLong(c.getColumnIndex(TIME));
         }
 
-        return new Row (conversationID, user, cont, time);
+        return new Row(0, "friend", lastRow, time);
+
     }
 
 
