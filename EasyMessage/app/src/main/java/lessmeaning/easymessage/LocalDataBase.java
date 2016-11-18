@@ -16,7 +16,6 @@ import java.util.ArrayList;
  */
 
 public class LocalDataBase extends SQLiteOpenHelper implements BaseColumns {
-    private static final String TAG = "newITIS";
     String myLog = "test db";
 
     public static final String TABLE_NAME_APPROVED = "ApprovedTable";
@@ -124,7 +123,6 @@ public class LocalDataBase extends SQLiteOpenHelper implements BaseColumns {
             do {
                 String content = c.getString(c.getColumnIndex(CONTENT));
                 long time = c.getLong(c.getColumnIndex(TIME));
-                Log.d(TAG, "get Approved time of " + " = " + time);
                 String userSender = c.getString(c.getColumnIndex(USER));
                 long conversationID = c.getLong(c.getColumnIndex(CONVERSATION_ID));
                 Row r = new Row(conversationID, userSender, content, time);

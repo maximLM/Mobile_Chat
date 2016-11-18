@@ -195,6 +195,10 @@ public class LocalCore {
             ((ConversationActivity) activity).fail("No Connection");
             return;
         }
+        if (db.haveConversation(username)) {
+            ((ConversationActivity) activity)
+                    .fail("You already created conversation with this friend");
+        }
         new Thread(new Runnable() {
             @Override
             public void run() {
