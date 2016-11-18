@@ -9,9 +9,6 @@ class Row implements Comparable<Row> {
     private static final String TAG = "newITIS";
     private String content;
     private long time;
-
-
-
     private long conversationID;
     private String userSender;
 

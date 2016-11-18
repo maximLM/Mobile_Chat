@@ -102,9 +102,9 @@ public class LocalDataBase extends SQLiteOpenHelper implements BaseColumns {
         if(c.moveToFirst()){
             do {
                 String content = c.getString(c.getColumnIndex(CONTENT));
-                long time = c.getInt(c.getColumnIndex(TIME));
+                long time = c.getLong(c.getColumnIndex(TIME));
                 String userSender = c.getString(c.getColumnIndex(USER));
-                long conversationID = c.getInt(c.getColumnIndex(CONVERSATION_ID));
+                long conversationID = c.getLong(c.getColumnIndex(CONVERSATION_ID));
                 Row r = new Row(conversationID, userSender, content, time);
                 row.add(r);
             } while (c.moveToNext());
@@ -139,8 +139,8 @@ public class LocalDataBase extends SQLiteOpenHelper implements BaseColumns {
         Cursor c = chatDB.query(TABLE_NAME_TEMP , null, null, null, null, null, null);
         if (c.moveToFirst()){
             do {
-                long id = c.getInt(c.getColumnIndex(KEY_ID));
-                long conversationID = c.getInt(c.getColumnIndex(CONVERSATION_ID));
+                long id = c.getLong(c.getColumnIndex(KEY_ID));
+                long conversationID = c.getLong(c.getColumnIndex(CONVERSATION_ID));
                 String content = c.getString(c.getColumnIndex(CONTENT));
                 alTemp.add(new TempRow(conversationID, content, id));
             } while (c.moveToNext());
@@ -156,9 +156,9 @@ public class LocalDataBase extends SQLiteOpenHelper implements BaseColumns {
         int i = 0;
         if (c.moveToFirst()){
             do {
-                long conversationID = c.getInt(c.getColumnIndex(CONVERSATION_ID));
+                long conversationID = c.getLong(c.getColumnIndex(CONVERSATION_ID));
                 String friend = c.getString(c.getColumnIndex(USER));
-                long time = c.getInt(c.getColumnIndex(TIME));
+                long time = c.getLong(c.getColumnIndex(TIME));
                 alTemp.add(new Conversation(conversationID, friend, time));
                 alTemp.get(i).setLastRow(getLastRow(conversationID));
                 i++;
@@ -187,7 +187,6 @@ public class LocalDataBase extends SQLiteOpenHelper implements BaseColumns {
     }
 
     public void deleteEverything() {
-        SQLiteDatabase hatDB = this.getWritableDatabase();
         SQLiteDatabase chatDB = this.getWritableDatabase();
         chatDB.delete(TABLE_NAME_TEMP, null, null);
         chatDB.delete(TABLE_NAME_CONVERSATION, null, null);
@@ -251,6 +250,18 @@ public class LocalDataBase extends SQLiteOpenHelper implements BaseColumns {
         }
 
         return new Row(0, "friend", lastRow, time);
+
+    }
+
+    public boolean haveConversation(String username) {
+        boolean haveConv = false;
+        SQLiteDatabase chatDB = this.getWritableDatabase();
+        Cursor c = chatDB.query(TABLE_NAME_CONVERSATION, new String[] {"MIN(_id)"}, USER + " =?", new String[] {username}, null, null, null);
+        if(c.moveToFirst()) {
+            haveConv = true;
+        }
+
+        return haveConv;
     }
 
 

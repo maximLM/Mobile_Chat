@@ -9,16 +9,17 @@ public class Conversation {
     private String friend;
     private long conversationID;
     private long time;
-
     private Row row;
 
-    public Conversation(long conversationID, String friend, long time) {
+
+    public Conversation(long conversationID, String friend, long time ) {
         this.conversationID = conversationID;
         this.friend = friend;
         this.time = time;
     }
 
     public void setLastRow(Row lastRow) { this.row = lastRow; }
+
 
     public long getTime() { return time; }
 
