@@ -24,7 +24,7 @@ import java.util.Collections;
 
 public class Merger extends Service implements Runnable {
 
-    //    private static final String TAG = "newITIS";
+//        private static final String TAG = "newITIS";
     private volatile boolean running;
     private volatile LocalDataBase localdb;
     private final String SERVER_NAME = "http://e-chat.h1n.ru";

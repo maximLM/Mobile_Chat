@@ -12,6 +12,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 
 /**
  * Created by Максим on 03.11.2016.
@@ -21,7 +22,8 @@ public class LocalCore {
 //    left right
 
 
-    //    private static final String TAG = "newITIS";
+
+    private static final String TAG = "newITIS";
     private LocalDataBase db;
     private BroadcastReceiver brv;
     private Activity activity;
@@ -42,8 +44,12 @@ public class LocalCore {
                 boolean isConv = intent.getBooleanExtra(IS_CONVERSATION, false);
                 if (isConv && clazz == ConversationActivity.class) {
                     sendConversations();
-                } else if (!isConv && clazz == MessagesActivity.class) {
-                    sendApproved();
+                } else if (!isConv ) {
+                    if (clazz == MessagesActivity.class) {
+                        sendApproved();
+                    } else if (clazz == ConversationActivity.class) {
+                        sendConversations();
+                    }
                 }
             }
         };
@@ -68,8 +74,32 @@ public class LocalCore {
         if (convs == null) return;
         if (convs.size() > 0)
             convs.remove(0);
-        Collections.sort(convs);
-        ((ConversationActivity) activity).reloadList(convs);
+        Collections.sort(convs, new Comparator<Conversation>() {
+            @Override
+            public int compare(Conversation conve, Conversation conve2) {
+                Row r1 = conve.getRow();
+                Row r2 = conve2.getRow();
+                Log.d(TAG, "in compare : ");
+                Log.d(TAG, "compare: " + r1);
+                Log.d(TAG, "compare: " + r2);
+                if (r1 == null && r2 == null)
+                    return 0;
+                else if (r1 == null)
+                    return 1;
+                else if (r2 == null)
+                    return -1;
+                else {
+                    int res = -r1.compareTo(r2);
+                    long time1 = r1.getTime();
+                    long time2 = r2.getTime();
+                    Log.d(TAG, "compare: r1.time is " + time1);
+                    Log.d(TAG, "compare: r2.time is " + time2);
+                    Log.d(TAG, "compare: res is " + res);
+                    return res;
+                }
+            }
+        });
+        ((ConversationActivity)activity).reloadList(convs);
     }
 
     public void sendApproved() {
@@ -168,6 +198,10 @@ public class LocalCore {
         if (!ServerConnection.checkConnection(activity)) {
             ((ConversationActivity) activity).fail("No Connection");
             return;
+        }
+        if (db.haveConversation(username)) {
+            ((ConversationActivity) activity)
+                    .fail("You already created conversation with this friend");
         }
         new Thread(new Runnable() {
             @Override
