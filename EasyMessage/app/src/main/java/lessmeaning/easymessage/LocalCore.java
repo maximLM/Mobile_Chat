@@ -195,9 +195,14 @@ public class LocalCore {
             ((ConversationActivity) activity).fail("No Connection");
             return;
         }
+        if(db.haveConversation(username)){
+            ((ConversationActivity) activity).fail("Have dialog");
+            return;
+        }
         new Thread(new Runnable() {
             @Override
             public void run() {
+                Log.d("MIMI", "create dialog on server");
                 String utf = "UTF-8";
                 String lnk = null;
                 try {
