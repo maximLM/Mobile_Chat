@@ -9,12 +9,10 @@ public class Conversation {
     private String friend;
     private long conversationID;
     private long time;
-
-
     private Row row;
 
 
-    public Conversation(long conversationID, String friend, long time, Row lastRow ) {
+    public Conversation(long conversationID, String friend, long time ) {
         this.conversationID = conversationID;
         this.friend = friend;
         this.time = time;

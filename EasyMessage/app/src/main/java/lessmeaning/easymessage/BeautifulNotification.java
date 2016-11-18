@@ -16,7 +16,7 @@ public class BeautifulNotification  {
     public static void showMessageNotification (Context context, String msg, String sender, int conversationID) {
         Intent intent = new Intent(context, MessagesActivity.class);
         intent.putExtra(ConversationActivity.CONVERSATION_ID, conversationID);
-        PendingIntent pIntent = PendingIntent.getActivity(context, 0, intent, 0);
+        PendingIntent pIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         Notification notification = new NotificationCompat.Builder(context)
                 .setContentTitle(sender)
