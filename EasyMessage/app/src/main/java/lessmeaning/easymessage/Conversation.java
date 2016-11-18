@@ -4,7 +4,7 @@ package lessmeaning.easymessage;
  * Created by пользователь on 11.11.2016.
  */
 
-public class Conversation implements Comparable<Conversation> {
+public class Conversation {
 
     private String friend;
     private long conversationID;
@@ -18,8 +18,6 @@ public class Conversation implements Comparable<Conversation> {
         this.time = time;
     }
 
-    public Row getLastRow() { return row; }
-
     public void setLastRow(Row lastRow) { this.row = lastRow; }
 
     public long getTime() { return time; }
@@ -27,12 +25,6 @@ public class Conversation implements Comparable<Conversation> {
     public long getConversationID() { return conversationID; }
 
     public String getFriend() { return friend; }
-
-
-    @Override
-    public int compareTo(Conversation conv) {
-        return (int) (time - conv.time);
-    }
 
     public Row getRow() {
         return row;

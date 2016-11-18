@@ -19,6 +19,7 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 
 /**
@@ -157,7 +158,12 @@ public class ServerConnection {
                     row.getLong(Fields.TIME + "")));
             Log.d(TAG, "convertConversation: conv is " + res.get(res.size() - 1).getFriend());
         }
-        Collections.sort(res);
+        Collections.sort(res, new Comparator<Conversation>() {
+            @Override
+            public int compare(Conversation conversation, Conversation t1) {
+                return (int) (conversation.getTime() - t1.getTime());
+            }
+        });
         return res;
     }
 

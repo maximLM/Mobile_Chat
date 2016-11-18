@@ -1,9 +1,12 @@
 package lessmeaning.easymessage;
 
+import android.util.Log;
+
 /**
  * Created by Максим on 03.11.2016.
  */
 class Row implements Comparable<Row> {
+    private static final String TAG = "newITIS";
     private String content;
     private long time;
 
@@ -15,6 +18,7 @@ class Row implements Comparable<Row> {
     public Row(long conversationID, String userSender, String content, long time) {
         this.content = content;
         this.time = time;
+        Log.d(TAG, "time in Row = " + time);
         this.conversationID = conversationID;
         this.userSender = userSender;
     }

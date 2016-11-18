@@ -16,6 +16,7 @@ import java.util.ArrayList;
  */
 
 public class LocalDataBase extends SQLiteOpenHelper implements BaseColumns {
+    private static final String TAG = "newITIS";
     String myLog = "test db";
 
     public static final String TABLE_NAME_APPROVED = "ApprovedTable";
@@ -122,9 +123,10 @@ public class LocalDataBase extends SQLiteOpenHelper implements BaseColumns {
         if(c.moveToFirst()){
             do {
                 String content = c.getString(c.getColumnIndex(CONTENT));
-                long time = c.getInt(c.getColumnIndex(TIME));
+                long time = c.getLong(c.getColumnIndex(TIME));
+                Log.d(TAG, "get Approved time of " + " = " + time);
                 String userSender = c.getString(c.getColumnIndex(USER));
-                long conversationID = c.getInt(c.getColumnIndex(CONVERSATION_ID));
+                long conversationID = c.getLong(c.getColumnIndex(CONVERSATION_ID));
                 Row r = new Row(conversationID, userSender, content, time);
                 row.add(r);
             } while (c.moveToNext());
@@ -243,12 +245,14 @@ public class LocalDataBase extends SQLiteOpenHelper implements BaseColumns {
         String buf = "" + conversationID;
         String[] conv = {buf};
         String lastRow = "";
-        Cursor c = chatDB.query(TABLE_NAME_APPROVED , new String[] {"MAX(_id)", CONTENT}, CONVERSATION_ID + " = ?", conv, null, null, null);
+        Cursor c = chatDB.query(TABLE_NAME_APPROVED , new String[] {"MAX(_id)", CONTENT, TIME}, CONVERSATION_ID + " = ?", conv, null, null, null);
+        long time = -1234;
         if(c.moveToFirst()){
             lastRow = c.getString(c.getColumnIndex(CONTENT));
+            time = c.getLong(c.getColumnIndex(TIME));
         }
 
-        return new Row(0, "friend", lastRow, 123);
+        return new Row(0, "friend", lastRow, time);
     }
 
 
