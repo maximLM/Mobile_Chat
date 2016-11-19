@@ -194,7 +194,7 @@ public class LocalCore {
         return input.toLowerCase().replaceAll(" ", "");
     }
 
-    public void createConversation(final String username) {
+    public void createConversation(String input) {
         if (clazz != ConversationActivity.class) return;
         if (db.getUsername() == null) {
             ((ConversationActivity) activity).fail("You are not logged");
@@ -204,6 +204,7 @@ public class LocalCore {
             ((ConversationActivity) activity).fail("No Connection");
             return;
         }
+        final String username = toUsername(input);
         if (db.haveConversation(username)) {
             ((ConversationActivity) activity)
                     .fail("You already created conversation with this friend");
