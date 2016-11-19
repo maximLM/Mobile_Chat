@@ -160,7 +160,7 @@ public class LocalDataBase extends SQLiteOpenHelper implements BaseColumns {
                 String friend = c.getString(c.getColumnIndex(USER));
                 long time = c.getLong(c.getColumnIndex(TIME));
                 alTemp.add(new Conversation(conversationID, friend, time));
-                alTemp.get(i).setLastRow(getLastRow(conversationID));
+                alTemp.get(i).setLastRow(getLastRow(conversationID, time));
                 i++;
             } while (c.moveToNext());
         }
@@ -237,19 +237,18 @@ public class LocalDataBase extends SQLiteOpenHelper implements BaseColumns {
 
     }
 
-    public Row getLastRow(long conversationID){
+    public Row getLastRow(long conversationID, long time){
         SQLiteDatabase chatDB = this.getWritableDatabase();
         String buf = "" + conversationID;
         String[] conv = {buf};
         String lastRow = "";
         Cursor c = chatDB.query(TABLE_NAME_APPROVED , new String[] {"MAX(_id)", CONTENT, TIME}, CONVERSATION_ID + " = ?", conv, null, null, null);
-        long time = -1234;
         if(c.moveToFirst()){
             lastRow = c.getString(c.getColumnIndex(CONTENT));
-            time = c.getLong(c.getColumnIndex(TIME));
+            long tmp = c.getLong(c.getColumnIndex(TIME));
+            time = tmp == 0 ? time : tmp;
         }
-
-        return new Row(0, "friend", lastRow, time);
+        return new Row(conversationID, "friend", lastRow, time);
 
     }
 

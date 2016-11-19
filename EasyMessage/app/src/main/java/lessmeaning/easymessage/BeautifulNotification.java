@@ -37,7 +37,7 @@ public class BeautifulNotification  {
 
     public static void showConversationNotification(Context context, String friendname) {
         friendname = "Created new conversation with " + friendname;
-        Intent intent = new Intent(context, MessagesActivity.class);
+        Intent intent = new Intent(context, ConversationActivity.class);
         PendingIntent pIntent = PendingIntent.getActivity(context, 0, intent, 0);
 
         Notification notification = new NotificationCompat.Builder(context)

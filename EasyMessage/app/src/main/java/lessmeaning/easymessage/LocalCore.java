@@ -80,25 +80,22 @@ public class LocalCore {
                 Row r1 = conve.getRow();
                 Row r2 = conve2.getRow();
                 Log.d(TAG, "in compare : ");
-                Log.d(TAG, "compare: " + r1);
-                Log.d(TAG, "compare: " + r2);
+                Log.d(TAG, "compare: " + conve.getTime());
+                Log.d(TAG, "compare: " + conve2.getTime());
                 if (r1 == null && r2 == null)
-                    return 0;
+                    return (int) -(conve.getTime() - conve2.getTime());
                 else if (r1 == null)
-                    return 1;
+                    return (int) -(conve.getTime() - r2.getTime());
                 else if (r2 == null)
-                    return -1;
-                else {
-                    int res = -r1.compareTo(r2);
-                    long time1 = r1.getTime();
-                    long time2 = r2.getTime();
-                    Log.d(TAG, "compare: r1.time is " + time1);
-                    Log.d(TAG, "compare: r2.time is " + time2);
-                    Log.d(TAG, "compare: res is " + res);
-                    return res;
-                }
+                    return (int) -(r1.getTime() - conve2.getTime());
+                else 
+                    return -r1.compareTo(r2);
+                
             }
         });
+        for(Conversation c : convs) {
+            Log.d(TAG, c.getFriend() + "  " + c.getRow().getTime());
+        }
         ((ConversationActivity)activity).reloadList(convs);
     }
 
