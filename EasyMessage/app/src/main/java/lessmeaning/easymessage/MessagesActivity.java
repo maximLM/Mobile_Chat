@@ -106,6 +106,7 @@ public class MessagesActivity extends AppCompatActivity implements View.OnClickL
     public void onClick (View v) {
         if (v.getId() == mButton.getId()) {
             if (!mEditText.getText().toString().equals("")) {
+
                 localCore.addTemp(mEditText.getText().toString());
                 mEditText.setText("");
 

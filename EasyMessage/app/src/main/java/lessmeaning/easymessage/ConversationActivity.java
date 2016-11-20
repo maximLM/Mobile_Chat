@@ -8,29 +8,38 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.util.AttributeSet;
 import android.view.KeyEvent;;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.support.design.widget.NavigationView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.ProgressBar;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.zip.Inflater;
+
+import static lessmeaning.easymessage.R.id.center;
+import static lessmeaning.easymessage.R.id.username;
 
 /**
  * Created by 1 on 11.11.2016.
  */
 
-public class ConversationActivity extends AppCompatActivity implements View.OnClickListener, NavigationView.OnNavigationItemSelectedListener {
+public class ConversationActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     private static final String TAG = "newITIS";
-    private Button mCreate;
     private ConversationAdapter adapter;
     private ListView mListView;
-    private EditText userName;
     private LocalCore localCore;
     private DrawerLayout drawerLayout;
     private NavigationView navigationView;
@@ -45,10 +54,7 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
         drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-        mCreate = (Button) findViewById(R.id.create_button);
         mListView = (ListView) findViewById(R.id.conversations);
-        userName = (EditText) findViewById(R.id.find_username);
-        mCreate.setOnClickListener(this);
         localCore = new LocalCore(this);
         if (!localCore.checkAuthorization()) {
             goToSignInActivity();
@@ -73,17 +79,6 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
         localCore.connectToService();
         localCore.sendConversations();
     }
-
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case (R.id.create_button):
-                hideKeayboard();
-                localCore.createConversation(userName.getText().toString());
-                break;
-        }
-    }
-
 
     @Override
     public void onBackPressed() {
@@ -166,6 +161,31 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(intent);
                 finish();
+                break;
+            case R.id.nav_create:
+                //toDO create Alert Dialog with creating
+                dialog = new AlertDialog.Builder(this);
+                dialog.setTitle("Creating conversation");
+                final EditText text = new EditText(this);
+                text.setLayoutParams(new DrawerLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.MATCH_PARENT));
+                text.setHint("Input username");
+                dialog.setView(text);
+
+                dialog.setPositiveButton("Create", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        localCore.createConversation(text.getText().toString());
+                        dialog.cancel();
+                    }
+                });
+                dialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+                dialog.create().show();
                 break;
         }
         drawerLayout.closeDrawer(GravityCompat.START);
