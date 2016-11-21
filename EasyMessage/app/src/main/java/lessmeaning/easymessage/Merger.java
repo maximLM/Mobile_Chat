@@ -43,11 +43,7 @@ public class Merger extends Service implements Runnable {
             try {
                 checkLocal();
                 checkServer();
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+                Thread.sleep(1000);
             } catch (Exception e) {
                 e.printStackTrace();
             }

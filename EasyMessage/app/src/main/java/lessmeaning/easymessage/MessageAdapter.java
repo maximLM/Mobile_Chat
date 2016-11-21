@@ -1,6 +1,7 @@
 package lessmeaning.easymessage;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -45,13 +46,12 @@ public class MessageAdapter extends BaseAdapter {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         Row row = (Row) getItem(position);
-        View view = convertView;
-        if (view == null) {
-            if (username.equals(row.getUserSender())) {
-                view = inflater.inflate(R.layout.my_item, parent, false);
-            } else view = inflater.inflate(R.layout.item, parent, false);
+        View view;
+        if (username.equals(row.getUserSender())) {
+            view = inflater.inflate(R.layout.my_item, parent, false);
+        } else {
+            view = inflater.inflate(R.layout.item, parent, false);
         }
-
         ((TextView) view.findViewById(R.id.sender)).setText(row.getUserSender());
         ((TextView) view.findViewById(R.id.message)).setText(row.getContent());
         return view;
