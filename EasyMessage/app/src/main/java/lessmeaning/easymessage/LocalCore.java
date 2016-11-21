@@ -54,10 +54,14 @@ public class LocalCore {
             }
         };
         if (clazz == MessagesActivity.class) {
-            ((MessagesActivity) activity).setUsername(db.getUsername());
+//            String user;  TODO stoppede here
+            String user = db.getUsername();
+            Log.d(TAG, "user is  " + user);
+            ((MessagesActivity) activity).setUsername(user);
             sendApproved();
-        } else if (clazz == ConversationActivity.class)
+        } else if (clazz == ConversationActivity.class) {
             sendConversations();
+        }
         connectToService();
     }
 
@@ -124,13 +128,12 @@ public class LocalCore {
         }
         if (clazz == MessagesActivity.class || clazz == ConversationActivity.class)
             activity.registerReceiver(brv, new IntentFilter(BROADCAST));
-        if (isServiceRunning(Merger.class, activity)) {
-            Log.d("supertesting", "connectToService: already running");
-            return;
-        } else {
+        if (!isServiceRunning(Merger.class, activity) || clazz == ConversationActivity.class) {
             Log.d("supertesting", "connectToService: starrt");
             Intent intent = new Intent(activity, Merger.class);
             activity.startService(intent);
+        } else {
+            Log.d(TAG, "not needed to update");
         }
     }
 
