@@ -70,7 +70,9 @@ public class LocalCore {
     }
 
     public void addTemp(String inf) {
-        db.addTemp(new TempRow(convID, inf, -124));
+        TempRow row = new TempRow(convID, inf, -124);
+        row.encrypt();
+        db.addTemp(row);
     }
 
     public void sendConversations() {
@@ -98,7 +100,7 @@ public class LocalCore {
             }
         });
         for(Conversation c : convs) {
-            Log.d(TAG, c.getFriend() + "  " + c.getRow().getTime());
+            if (c.getRow() != null) c.getRow().decrypt();
         }
         ((ConversationActivity)activity).reloadList(convs);
     }
@@ -107,7 +109,9 @@ public class LocalCore {
         if (clazz != MessagesActivity.class) return;
         ArrayList<Row> rows = db.getApproved(convID);
         Collections.sort(rows);
-
+        for (Row row : rows) {
+            row.decrypt();
+        }
         ((MessagesActivity) activity).reloadList(rows);
     }
 

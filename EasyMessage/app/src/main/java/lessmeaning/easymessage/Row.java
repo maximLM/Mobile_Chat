@@ -35,4 +35,8 @@ class Row implements Comparable<Row> {
     public long getConversationID() { return conversationID; }
 
     public String getUserSender() { return userSender; }
+
+    public void decrypt() {
+        content = MessageEncryption.decrypt(content, conversationID);
+    }
 }

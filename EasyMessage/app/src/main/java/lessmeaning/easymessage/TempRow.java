@@ -20,4 +20,8 @@ public class TempRow {
     public String getContent() { return content; }
 
     public long getId() { return id; }
+
+    public void encrypt() {
+        content = MessageEncryption.encrypt(content, conversationID);
+    }
 }
