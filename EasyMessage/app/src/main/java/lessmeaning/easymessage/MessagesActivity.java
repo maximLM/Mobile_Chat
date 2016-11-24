@@ -65,8 +65,6 @@ public class MessagesActivity extends AppCompatActivity implements View.OnClickL
         super.onCreate(savedInstanceState);
         ask(Manifest.permission.INTERNET);
         ask(Manifest.permission.ACCESS_NETWORK_STATE);
-        ask(Manifest.permission.CALL_PHONE);
-        ask(Manifest.permission.READ_PHONE_STATE);
         Log.d("supertesting", "onCreate: debug available");
         setContentView(R.layout.activity_messages);
         mButton = (Button) findViewById(R.id.button);

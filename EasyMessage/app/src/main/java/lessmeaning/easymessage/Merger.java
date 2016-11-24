@@ -24,7 +24,6 @@ import java.util.Collections;
 
 public class Merger extends Service implements Runnable {
 
-//        private static final String TAG = "newITIS";
     private volatile boolean running;
     private volatile LocalDataBase localdb;
     private final String SERVER_NAME = "http://e-chat.h1n.ru";
@@ -57,13 +56,15 @@ public class Merger extends Service implements Runnable {
                 localdb.getLastTimeConv());
         if (convs != null && convs.size() > 0) {
             localdb.addConversations(convs);
-            sendMsgToUpd("New Conversation with " + convs.get(convs.size() - 1).getFriend(), "", 0, true);
+            Conversation co = convs.get(convs.size() - 1);
+            sendMsgToUpd("",co.getFriend(), (int) co.getConversationID(), true);
         }
         ArrayList<Row> rows = ServerConnection.getMessages(localdb.getUsername(),
                 localdb.getLastTimeMess());
         if (rows != null && rows.size() > 0) {
             localdb.addApproved(rows);
-            Row row = rows.get(rows.size() - 1);
+            Row row = rows.get(rows.size() - 1).clone();
+            row.decrypt();
             sendMsgToUpd(row.getContent(), row.getUserSender(), (int) row.getConversationID(), false);
         }
     }
@@ -136,7 +137,7 @@ public class Merger extends Service implements Runnable {
         }
     }
 
-    private void sendMsgToUpd(String msg,String sender, int conversationId, boolean isConv) {
+    private void sendMsgToUpd(String msg, String sender, int conversationId, boolean isConv) {
         String user = localdb.getUsername();
         if (user == null) return;
         Intent intent = new Intent(LocalCore.BROADCAST);
@@ -144,6 +145,7 @@ public class Merger extends Service implements Runnable {
         sendBroadcast(intent);
         if (sender != null && sender.equals(user)) return;
         intent = new Intent(this, MessageReceiver.class);
+        intent.putExtra(MessageReceiver.IS_CONVERSATION, isConv);
         intent.putExtra(MessageReceiver.MESSAGE, msg);
         intent.putExtra(MessageReceiver.CONVERSATION_ID, conversationId);
         intent.putExtra(MessageReceiver.SENDER_NAME, sender);

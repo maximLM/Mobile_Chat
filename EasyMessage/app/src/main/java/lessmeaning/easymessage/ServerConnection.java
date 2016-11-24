@@ -26,7 +26,6 @@ import java.util.HashSet;
  * Created by Максим on 13.11.2016.
  */
 public class ServerConnection {
-    private static final String TAG = "supertesting";
 
     public static String executeQuery(String lnk) {
         BufferedReader in = null;
@@ -48,10 +47,6 @@ public class ServerConnection {
                 buffer.append(line);
             }
             rawInput = buffer.toString();
-            if (rawInput != null) {
-                Log.d(TAG, "lnk : " + lnk);
-                Log.d(TAG, "checkServer: rawInput = " + rawInput);
-            }
         } catch (ProtocolException e) {
             e.printStackTrace();
         } catch (MalformedURLException e) {
@@ -71,7 +66,6 @@ public class ServerConnection {
             }
         }
         if (rawInput == null || rawInput.equals("")) return null;
-        Log.d(TAG, "raw again: " + rawInput);
         return rawInput;
     }
 
@@ -135,7 +129,6 @@ public class ServerConnection {
                     row.getString(Fields.AUTHOR + ""),
                     row.getString(Fields.MESSAGE + ""),
                     row.getLong(Fields.TIME + "")));
-            Log.d(TAG, "convertMessage: row is " + res.get(res.size() - 1).getContent());
         }
         Collections.sort(res);
         return res;
@@ -156,7 +149,6 @@ public class ServerConnection {
             res.add(new Conversation(id,
                     friend,
                     row.getLong(Fields.TIME + "")));
-            Log.d(TAG, "convertConversation: conv is " + res.get(res.size() - 1).getFriend());
         }
         Collections.sort(res, new Comparator<Conversation>() {
             @Override

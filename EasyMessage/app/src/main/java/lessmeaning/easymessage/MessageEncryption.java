@@ -68,4 +68,12 @@ public class MessageEncryption {
         }
         return null;
     }
+
+    public static String encryptPassword(String x) throws Exception {
+        java.security.MessageDigest d = null;
+        d = java.security.MessageDigest.getInstance("SHA-1");
+        d.reset();
+        d.update(x.getBytes());
+        return new String(d.digest());
+    }
 }

@@ -39,4 +39,9 @@ class Row implements Comparable<Row> {
     public void decrypt() {
         content = MessageEncryption.decrypt(content, conversationID);
     }
+
+    @Override
+    protected Row clone() {
+        return new Row(conversationID, userSender, content, time);
+    }
 }

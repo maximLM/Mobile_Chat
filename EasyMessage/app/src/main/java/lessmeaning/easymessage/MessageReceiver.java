@@ -20,7 +20,7 @@ public class MessageReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         if (intent.getBooleanExtra(IS_CONVERSATION, false)) {
             BeautifulNotification.showConversationNotification(context,
-                    intent.getStringExtra(MESSAGE));
+                    intent.getStringExtra(SENDER_NAME));
         } else {
             BeautifulNotification.showMessageNotification(context,
                     intent.getStringExtra(MESSAGE),
