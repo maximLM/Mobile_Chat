@@ -4,40 +4,12 @@
     android:layout_height="match_parent"
     android:background="#1abc9c">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="55dp">
-        <EditText
-            android:id="@+id/find_username"
-            android:layout_marginTop="2dp"
-            android:singleLine="true"
-            android:paddingLeft="5dp"
-            android:paddingRight="5dp"
-            android:background="@drawable/field_ic"
-            android:gravity="center"
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:layout_weight="6"
-            android:hint="Type username"/>
-
-        <Button
-            android:id="@+id/create_button"
-            android:layout_marginTop="2dp"
-            android:text="Ok"
-            android:layout_weight="2"
-            android:background="@drawable/button_ic"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_toRightOf="@+id/find_username" />
-    </LinearLayout>
-
     <ListView
         android:id="@+id/conversations"
         android:paddingLeft="10dp"
         android:paddingRight="10dp"
         android:paddingTop="5dp"
         android:paddingBottom="5dp"
-        android:layout_below="@+id/find_username"
         android:dividerHeight="10dp"
         android:divider="@drawable/divider"
         android:layout_width="match_parent"
