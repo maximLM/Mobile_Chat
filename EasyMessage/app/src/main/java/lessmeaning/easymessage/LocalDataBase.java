@@ -21,7 +21,7 @@ public class LocalDataBase extends SQLiteOpenHelper implements BaseColumns {
     public static final String TABLE_NAME_APPROVED = "ApprovedTable";
     public static final String TABLE_NAME_TEMP = "TempTable";
     public static final String TABLE_NAME_CONVERSATION = "ConversationTable";
-    public static final String DB_NAME = "Chat";
+    public static final String DB_NAME = "LessmeaningChat";
     public static final String CONVERSATION_ID = "conversationID";
     public static final String USER = "user";
     public static final String CONTENT = "Content";
@@ -266,4 +266,14 @@ public class LocalDataBase extends SQLiteOpenHelper implements BaseColumns {
     }
 
 
+    public String getFriend(int convID) {
+        SQLiteDatabase chatDB = this.getWritableDatabase();
+        String res = "";
+        String conv[] = {convID + ""};
+        Cursor c = chatDB.query(TABLE_NAME_CONVERSATION , new String[] {"MAX(_id)", USER}, CONVERSATION_ID + " = ?", conv, null, null, null);
+        if(c.moveToFirst()){
+            res = c.getString(c.getColumnIndex(USER));
+        }
+        return res;
+    }
 }

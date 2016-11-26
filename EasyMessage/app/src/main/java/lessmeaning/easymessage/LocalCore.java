@@ -62,6 +62,14 @@ public class LocalCore {
         } else if (clazz == ConversationActivity.class) {
             sendConversations();
         }
+        String user = db.getUsername();
+        if (user != null && !user.equals("")) {
+            if (clazz == ConversationActivity.class)
+                activity.setTitle(user);
+            else if (clazz == MessagesActivity.class) {
+                activity.setTitle(db.getFriend(convID));
+            }
+        }
         connectToService();
     }
 
